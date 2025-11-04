@@ -41,9 +41,9 @@
         --sidebar: 70%;
         --preview: 30%;
 
-        /* Preview size (50% of previous) */
-        --previewMax: 360px; /* was 720px */
-        --previewMaxMobile: 210px; /* was 420px */
+        /* Preview size */
+        --previewMax: 360px;
+        --previewMaxMobile: 210px;
       }
 
       * {
@@ -82,7 +82,7 @@
         border-right: 1px solid var(--line);
         padding: 18px;
         display: grid;
-        grid-template-rows: auto auto auto auto auto 1fr; /* brand, input, type+colors, credits, playback, spacer */
+        grid-template-rows: auto auto auto auto auto auto 1fr; /* brand, input, background, typography, credits, playback, spacer */
         gap: 16px;
         position: sticky;
         top: 0;
@@ -143,7 +143,7 @@
         opacity: 0.9;
       }
 
-      /* New horizontal helpers */
+      /* Helpers */
       .three-col {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
@@ -321,7 +321,7 @@
         width: 100%;
       }
 
-      /* Responsive: stack under 900px */
+      /* Responsive */
       @media (max-width: 900px) {
         .app {
           grid-template-columns: 1fr;
@@ -339,6 +339,36 @@
           width: min(100%, var(--previewMaxMobile));
         }
       }
+
+      /* Background panel: make everything sit on one horizontal row */
+      .background-panel .inline-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: nowrap; /* keep single line */
+        overflow-x: auto; /* allow sideways scroll if too many items */
+        padding-bottom: 4px;
+      }
+
+      /* Keep each control compact on the line */
+      .background-panel .inline-row .toggle,
+      .background-panel .inline-row .field {
+        flex: 0 0 auto;
+      }
+
+      /* Reasonable input widths so they don’t explode the row */
+      .background-panel .inline-row select,
+      .background-panel .inline-row input[type="color"] {
+        width: 220px;
+      }
+
+      /* Nicer hint placement to the far right */
+      .background-panel .inline-row .hint {
+        margin-left: auto;
+        white-space: nowrap;
+        opacity: 0.8;
+        font-size: 11px;
+      }
     </style>
   </head>
   <body>
@@ -353,9 +383,9 @@
           </div>
         </div>
 
-        <!-- Panel: Input (Row 1 horizontal) -->
+        <!-- Panel: Input -->
         <div class="panel">
-          <h3>Input</h3>
+          <h3>Choose</h3>
           <div class="three-col">
             <div class="field">
               <label class="small" for="surah">Surah</label>
@@ -371,30 +401,117 @@
             </div>
           </div>
 
-          <div class="field">
-            <label class="small" for="reciter">Reciter</label>
-            <select id="reciter">
-              <option value="Abdul_Basit_Mujawwad_128kbps">
-                Abdul Basit (Mujawwad)
-              </option>
-              <option value="Alafasy_128kbps">Mishary Alafasy</option>
-              <option value="Husary_128kbps">Mahmoud Khalil Al-Husary</option>
-              <option value="Hudhaify_128kbps">Ali Al-Hudhaify</option>
-              <option value="Minshawi_Mujawwad_128kbps">
-                Mohamed S. El-Minshawi
-              </option>
-            </select>
+          <div class="two-col-inline">
+            <div class="field">
+              <label class="small" for="reciter">Reciter (with language)</label>
+              <select id="reciter">
+                <option value="Abdul_Basit_Mujawwad_128kbps">
+                  Abdul Basit — Mujawwad (Arabic)
+                </option>
+                <option value="Alafasy_128kbps">
+                  Mishary Alafasy (Arabic)
+                </option>
+                <option value="Husary_128kbps">
+                  Mahmoud Khalil Al-Husary (Arabic)
+                </option>
+                <option value="Hudhaify_128kbps">
+                  Ali Al-Hudhaify (Arabic)
+                </option>
+                <option value="Minshawi_Mujawwad_128kbps">
+                  Mohamed S. El-Minshawi (Arabic)
+                </option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label class="small" for="translationEdition"
+                >Translation (text) edition</label
+              >
+              <select id="translationEdition">
+                <option value="en.asad">English — Muhammad Asad</option>
+                <option value="en.sahih">English — Sahih International</option>
+                <option value="en.pickthall">English — Pickthall</option>
+                <option value="en.yusufali">English — Yusuf Ali</option>
+                <option value="bn.bengali">
+                  Bengali — Bengali Translation
+                </option>
+                <option value="ur.jalandhry">
+                  Urdu — Fateh Muhammad Jalandhry
+                </option>
+                <option value="id.indonesian">
+                  Indonesian — Bahasa Indonesia
+                </option>
+                <option value="fr.hamidullah">
+                  French — Muhammad Hamidullah
+                </option>
+              </select>
+            </div>
           </div>
         </div>
 
-        <!-- Panel: Typography + Colors (Row 2 horizontal) -->
+        <!-- Panel: Background -->
+        <div class="panel background-panel">
+          <h3>Background</h3>
+          <div class="inline-row">
+            <!-- Mode toggles -->
+            <label class="toggle" title="Use a solid background color">
+              <input
+                type="radio"
+                name="bgMode"
+                value="color"
+                id="bgModeColor"
+                checked
+              />
+              <span>Solid Color</span>
+            </label>
+
+            <label
+              class="toggle"
+              title="Use image/video from assets/background"
+            >
+              <input
+                type="radio"
+                name="bgMode"
+                value="media"
+                id="bgModeMedia"
+              />
+              <span>Media (image/video)</span>
+            </label>
+
+            <!-- Solid color picker (shown when 'color' is selected) -->
+            <div class="field" id="bgColorField">
+              <label class="small" for="bgColor">Background Color</label>
+              <input id="bgColor" type="color" value="#ffffff" />
+            </div>
+
+            <!-- Media selector (shown when 'media' is selected) -->
+            <div class="field" id="bgMediaField" style="display: none">
+              <label class="small" for="bgMediaSelect"
+                >Choose Background (Image/Video)</label
+              >
+              <select id="bgMediaSelect"></select>
+              <span class="hint" id="bgMediaHint"
+                >Using configured media list.</span
+              >
+
+              <input
+                style="display: none"
+                id="bgFolderPicker"
+                type="file"
+                webkitdirectory
+                multiple
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- Panel: Typography -->
         <div class="panel">
           <h3>Typography</h3>
           <div class="four-col-inline">
             <div class="field">
               <label class="small" for="fontPicker">Font Style</label>
               <select id="fontPicker">
-                <!-- Original options -->
                 <option value="Inter, sans-serif">Inter</option>
                 <option value="Poppins, sans-serif">Poppins</option>
                 <option value="Lora, serif">Lora</option>
@@ -402,7 +519,6 @@
                 <option value="Nunito, sans-serif">Nunito</option>
                 <option value="Roboto Slab, serif">Roboto Slab</option>
 
-                <!-- Popular Latin sans-serifs -->
                 <option value="Montserrat, sans-serif">Montserrat</option>
                 <option value="Open Sans, sans-serif">Open Sans</option>
                 <option value="Source Sans 3, sans-serif">Source Sans 3</option>
@@ -420,7 +536,6 @@
                 <option value="Space Grotesk, sans-serif">Space Grotesk</option>
                 <option value="Fira Sans, sans-serif">Fira Sans</option>
 
-                <!-- Latin serif / display -->
                 <option value="Playfair Display, serif">
                   Playfair Display
                 </option>
@@ -430,17 +545,14 @@
                 </option>
                 <option value="PT Serif, serif">PT Serif</option>
 
-                <!-- Friendly / rounded -->
                 <option value="Quicksand, sans-serif">Quicksand</option>
 
-                <!-- Mono (for captions/debug) -->
                 <option value="Space Mono, monospace">Space Mono</option>
                 <option value="Fira Code, monospace">Fira Code</option>
                 <option value="JetBrains Mono, monospace">
                   JetBrains Mono
                 </option>
 
-                <!-- Arabic & Quran-friendly typefaces -->
                 <option value="Amiri, serif">Amiri</option>
                 <option value="Scheherazade New, serif">
                   Scheherazade New
@@ -465,9 +577,10 @@
               </select>
             </div>
             <div class="field">
-              <label class="small" for="textSize">
-                Font Size <span id="textSizeVal" class="name-chip">(100%)</span>
-              </label>
+              <label class="small" for="textSize"
+                >Font Size
+                <span id="textSizeVal" class="name-chip">(100%)</span></label
+              >
               <input
                 id="textSize"
                 type="range"
@@ -481,29 +594,13 @@
               <label class="small" for="fontColor">Font Color</label>
               <input id="fontColor" type="color" value="#111111" />
             </div>
-            <div class="field">
-              <label class="small" for="bgColor">Background Color</label>
-              <input id="bgColor" type="color" value="#ffffff" />
-            </div>
           </div>
-          <p class="hint">Set your font, size, and colors in one row.</p>
         </div>
 
-        <!-- Panel: Credits (Row 3 horizontal) -->
+        <!-- Panel: Credits -->
         <div class="panel">
           <h3>Credits</h3>
           <div class="four-col-inline">
-            <label
-              class="toggle"
-              title="Show attribution to data/audio providers on the video"
-            >
-              <input type="checkbox" id="creditData" checked />
-              <span>Show Data Source Credit</span>
-            </label>
-            <label class="toggle" title="Show your creator tag on the video">
-              <input type="checkbox" id="creditCreator" checked />
-              <span>Show Editor Creator Credit (TheAAA)</span>
-            </label>
             <div class="field">
               <label class="small" for="madeByInput">Made by (name)</label>
               <input
@@ -513,25 +610,29 @@
                 value=""
               />
             </div>
+            <label class="toggle" title="Show a Made by badge">
+              <input type="checkbox" id="creditMadeBy" checked />
+              <span>Made by</span>
+            </label>
             <label
               class="toggle"
-              title="Show a Made by badge in the top-right of the Short"
+              title="Show attribution to data/audio providers"
             >
-              <input type="checkbox" id="creditMadeBy" checked />
-              <span>Show Made by</span>
+              <input type="checkbox" id="creditData" checked />
+              <span>Data Source</span>
+            </label>
+            <label class="toggle" title="Show your creator tag">
+              <input type="checkbox" id="creditCreator" checked />
+              <span>Editor Developer</span>
             </label>
           </div>
-          <p class="status">
-            These credits appear as subtle watermarks on the exported video. You
-            can turn them off.
-          </p>
         </div>
 
-        <!-- Panel: Playback & Export (Row 4 horizontal) -->
+        <!-- Panel: Playback & Export -->
         <div class="panel">
           <h3>Playback & Export</h3>
           <div class="transport">
-            <button id="buildPreviewBtn" class="btn">Load & Play</button>
+            <button id="buildPreviewBtn" class="btn">Play & Export</button>
             <button id="downloadBtn" class="btn" disabled>
               Download (WebM)
             </button>
@@ -603,10 +704,21 @@
       const bgColorInput = $("#bgColor");
       const fontColorInput = $("#fontColor");
 
+      const translationEditionSel = $("#translationEdition");
+
       const creditDataChk = $("#creditData");
       const creditCreatorChk = $("#creditCreator");
       const madeByInput = $("#madeByInput");
       const creditMadeByChk = $("#creditMadeBy");
+
+      const bgModeColor = $("#bgModeColor");
+      const bgModeMedia = $("#bgModeMedia");
+      const bgColorField = $("#bgColorField");
+      const bgMediaField = $("#bgMediaField");
+      const bgMediaSelect = $("#bgMediaSelect");
+      const bgMediaHint = $("#bgMediaHint");
+      const bgFolderPicker = $("#bgFolderPicker");
+      const bgFolderBtn = $("#bgFolderBtn");
 
       const previewCanvas = $("#previewCanvas");
       const pctx = previewCanvas.getContext("2d");
@@ -622,7 +734,7 @@
       const recStatus = $("#recStatus");
       const meterBar = $("#meterBar");
 
-      audio.crossOrigin = "anonymous"; // CORS hint for cross-origin audio
+      audio.crossOrigin = "anonymous";
 
       // ------------------ State ------------------
       let meta = { surahs: [] };
@@ -633,14 +745,27 @@
       // text controls
       let selectedFont = "Inter, sans-serif";
       let sizePercent = 100; // 25–160
+      let translationEdition = "en.asad";
 
       // drawing content
-      let currentText = "Centered English translation will appear here.";
+      let currentText = "Centered translation will appear here.";
       let currentLabel = "—";
+
+      // Background state
+      let backgroundMode = "color"; // 'color' | 'media'
       let bgColor = "#ffffff";
       let fontColor = "#111111";
+      let bgMediaList = []; // [{src, type, name?}]
+      let selectedBg = null; // active media item
+      const bgImg = new Image();
+      bgImg.crossOrigin = "anonymous";
+      const bgVideo = document.createElement("video");
+      bgVideo.loop = true;
+      bgVideo.muted = true;
+      bgVideo.playsInline = true;
+      bgVideo.crossOrigin = "anonymous";
 
-      // credits (default ON)
+      // credits
       let showCreditData = true;
       let showCreditCreator = true;
 
@@ -654,7 +779,7 @@
       let recordingStarted = false;
       let finalBlob = null;
 
-      // progress (visual meter)
+      // progress
       let totalAyahs = 0;
 
       // session info for filename
@@ -664,7 +789,7 @@
         sessionTo = 1,
         sessionReciterName = "Unknown";
 
-      // ------------------ Reset on input changes ------------------
+      // ------------------ Change handling ------------------
       function resetSessionUI() {
         try {
           if (recorder && recorder.state === "recording") recorder.stop();
@@ -687,6 +812,7 @@
         if (textSizeVal) textSizeVal.textContent = `(${sizePercent}%)`;
         if (bgColorInput) bgColor = bgColorInput.value;
         if (fontColorInput) fontColor = fontColorInput.value;
+        translationEdition = translationEditionSel?.value || "en.asad";
         showCreditData = !!creditDataChk?.checked;
         showCreditCreator = !!creditCreatorChk?.checked;
       }
@@ -702,6 +828,7 @@
         creditCreatorChk,
         bgColorInput,
         fontColorInput,
+        translationEditionSel,
       ]
         .filter(Boolean)
         .forEach((el) => {
@@ -714,12 +841,36 @@
           }
         });
 
-      // Live color preview
+      // Color preview
       bgColorInput?.addEventListener("input", () => {
         bgColor = bgColorInput.value;
       });
       fontColorInput?.addEventListener("input", () => {
         fontColor = fontColorInput.value;
+      });
+
+      // ------------------ Background mode toggles ------------------
+      function applyBgModeUI() {
+        if (backgroundMode === "color") {
+          bgColorField.style.display = "block";
+          bgMediaField.style.display = "none";
+        } else {
+          bgColorField.style.display = "none";
+          bgMediaField.style.display = "block";
+        }
+      }
+      bgModeColor?.addEventListener("change", () => {
+        if (bgModeColor.checked) {
+          backgroundMode = "color";
+          applyBgModeUI();
+        }
+      });
+      bgModeMedia?.addEventListener("change", async () => {
+        if (bgModeMedia.checked) {
+          backgroundMode = "media";
+          applyBgModeUI();
+          if (!bgMediaList.length) await loadBackgroundAssets();
+        }
       });
 
       // ------------------ Metadata ------------------
@@ -781,6 +932,121 @@
       }
       surahSel.addEventListener("change", updateAyahRange);
 
+      // ------------------ Background assets (simplified) ------------------
+      const ALLOWED_EXT = [
+        "png",
+        "jpg",
+        "jpeg",
+        "gif",
+        "bmp",
+        "webp",
+        "avif",
+        "mp4",
+        "webm",
+        "mov",
+        "m4v",
+      ];
+      function inferTypeFromPath(src) {
+        const l = (src || "").toLowerCase();
+        return ["mp4", "webm", "mov", "m4v"].some((e) => l.endsWith("." + e))
+          ? "video"
+          : "image";
+      }
+
+      function populateSelectFromList(list) {
+        bgMediaList = (list || []).filter(
+          (it) => it.src && (it.type === "image" || it.type === "video")
+        );
+        if (!bgMediaList.length) {
+          bgMediaSelect.innerHTML = "";
+          bgMediaHint.textContent = "No media configured.";
+          bgMediaSelect.disabled = true;
+          selectedBg = null;
+          return;
+        }
+        bgMediaSelect.innerHTML = bgMediaList
+          .map(
+            (it, i) =>
+              `<option value="${i}">${it.type === "video" ? "🎞️" : "🖼️"} ${
+                it.name || it.src
+              }</option>`
+          )
+          .join("");
+        bgMediaSelect.disabled = false;
+        bgMediaHint.textContent = `Found ${bgMediaList.length} item(s).`;
+        bgMediaSelect.value = "0";
+        onBgMediaChange();
+      }
+
+      // 👉 EDIT THIS ARRAY to list the exact files you placed under assets/background/
+      // Backgrounds now come from assets/background/background.json
+      const DEFAULT_BG_MEDIA = []; // (kept for safe fallback)
+
+      async function loadBackgroundAssets() {
+        try {
+          bgMediaHint.textContent = "Loading background.json…";
+          const res = await fetchRetry("assets/background/background.json");
+          const raw = await res.json();
+
+          // Normalize, infer type if missing, filter invalid, allow only allowed extensions
+          const normalized = (Array.isArray(raw) ? raw : [])
+            .map((it) => {
+              const src = it && it.src ? String(it.src) : "";
+              const ext = src.split(".").pop()?.toLowerCase() || "";
+              if (!ALLOWED_EXT.includes(ext)) return null;
+              return {
+                src,
+                name: it.name || src.split("/").pop(),
+                type: it.type ? it.type : inferTypeFromPath(src),
+              };
+            })
+            .filter(Boolean);
+
+          if (!normalized.length) {
+            // If JSON empty/invalid, fall back to any hardcoded defaults (optional)
+            if (DEFAULT_BG_MEDIA.length) {
+              bgMediaHint.textContent = "No items in JSON; using defaults.";
+              populateSelectFromList(DEFAULT_BG_MEDIA);
+            } else {
+              bgMediaHint.textContent = "No items found in background.json.";
+              populateSelectFromList([]);
+            }
+            return;
+          }
+
+          populateSelectFromList(normalized);
+          bgMediaHint.textContent = "Loaded";
+        } catch (e) {
+          console.warn("Failed to load background.json:", e);
+          if (DEFAULT_BG_MEDIA.length) {
+            bgMediaHint.textContent = "Failed to load JSON; using defaults.";
+            populateSelectFromList(DEFAULT_BG_MEDIA);
+          } else {
+            bgMediaHint.textContent = "Failed to load background.json.";
+            populateSelectFromList([]);
+          }
+        }
+      }
+
+      function onBgMediaChange() {
+        const idx = parseInt(bgMediaSelect.value, 10);
+        selectedBg = bgMediaList[idx] || null;
+        if (!selectedBg) return;
+        if (selectedBg.type === "image") {
+          bgImg.onload = () => {}; // RAF draw will pick it up on next frame
+          bgImg.src = selectedBg.src;
+        } else {
+          try {
+            bgVideo.src = selectedBg.src;
+            bgVideo.load();
+            bgVideo.play().catch(() => {
+              /* autoplay might be blocked; still renders first frame after load */
+            });
+          } catch {}
+        }
+      }
+      bgMediaSelect.addEventListener("change", onBgMediaChange);
+
       // ------------------ Text layout + drawing ------------------
       function fitTextToBox(
         ctx,
@@ -798,7 +1064,7 @@
           const lines = wrapText(
             ctx,
             text,
-            `${weight} ${size}px ${fontFamily}`,
+            weight + " " + size + "px " + fontFamily,
             maxW
           );
           const lineH = Math.round(size * lhRatio);
@@ -812,7 +1078,7 @@
           lines: wrapText(
             ctx,
             text,
-            `${weight} ${minSize}px ${fontFamily}`,
+            weight + " " + minSize + "px " + fontFamily,
             maxW
           ),
           lineHeight: Math.round(minSize * lhRatio),
@@ -820,7 +1086,9 @@
       }
       function wrapText(ctx, text, font, maxW) {
         ctx.font = font;
-        const words = String(text || "").split(/\s+/);
+        const words = String(text || "")
+          .trim()
+          .split(/\s+/);
         const lines = [];
         let cur = "";
         for (const w of words) {
@@ -845,7 +1113,6 @@
         if (cur) lines.push(cur);
         return lines;
       }
-
       function drawRoundedRect(ctx, x, y, w, h, r) {
         const rr = Math.min(r, w / 2, h / 2);
         ctx.beginPath();
@@ -860,29 +1127,65 @@
         ctx.quadraticCurveTo(x, y, x + rr, y);
         ctx.closePath();
       }
-
+      function drawMediaCover(ctx, mediaEl, W, H) {
+        const mw = mediaEl.videoWidth || mediaEl.naturalWidth;
+        const mh = mediaEl.videoHeight || mediaEl.naturalHeight;
+        if (!mw || !mh) return false;
+        const canvasAR = W / H;
+        const mediaAR = mw / mh;
+        let dw, dh, dx, dy;
+        if (mediaAR > canvasAR) {
+          dh = H;
+          dw = H * mediaAR;
+          dx = (W - dw) / 2;
+          dy = 0;
+        } else {
+          dw = W;
+          dh = W / mediaAR;
+          dx = 0;
+          dy = (H - dh) / 2;
+        }
+        ctx.drawImage(mediaEl, dx, dy, dw, dh);
+        return true;
+      }
       function drawPreview() {
         const W = previewCanvas.width,
           H = previewCanvas.height;
-        pctx.fillStyle = bgColor;
-        pctx.fillRect(0, 0, W, H);
 
+        // Background
+        if (backgroundMode === "media" && selectedBg) {
+          let drew = false;
+          if (
+            selectedBg.type === "image" &&
+            bgImg.complete &&
+            bgImg.naturalWidth
+          ) {
+            drew = drawMediaCover(pctx, bgImg, W, H);
+          } else if (selectedBg.type === "video" && bgVideo.readyState >= 2) {
+            drew = drawMediaCover(pctx, bgVideo, W, H);
+          }
+          if (!drew) {
+            pctx.fillStyle = bgColor;
+            pctx.fillRect(0, 0, W, H);
+          }
+        } else {
+          pctx.fillStyle = bgColor;
+          pctx.fillRect(0, 0, W, H);
+        }
+
+        // Text
         const marginX = 90,
           marginY = 180;
         const usableW = W - 2 * marginX,
           usableH = H - 2 * marginY;
-
-        const scale = (sizePercent || 100) / 100; // 0.25–1.6
-        const baseStart = 72 * scale;
-        const baseMin = 34 * scale;
-
+        const scale = (sizePercent || 100) / 100;
         const spec = fitTextToBox(
           pctx,
           currentText,
           usableW,
           usableH,
-          baseStart,
-          baseMin,
+          72 * scale,
+          34 * scale,
           1.25,
           selectedFont,
           700
@@ -893,17 +1196,15 @@
         pctx.textAlign = "center";
         pctx.textBaseline = "middle";
         pctx.font = `700 ${fontSize}px ${selectedFont}`;
-
         const totalH = lines.length * lineHeight;
         let y = H / 2 - totalH / 2;
-
         pctx.save();
         pctx.shadowColor = "rgba(0,0,0,0.14)";
         pctx.shadowBlur = 8;
         lines.forEach((ln, i) => pctx.fillText(ln, W / 2, y + i * lineHeight));
         pctx.restore();
 
-        // bottom label (ayah tag)
+        // Bottom label
         pctx.font = `600 ${Math.max(
           30,
           Math.round(36 * scale)
@@ -912,7 +1213,7 @@
         pctx.textAlign = "right";
         pctx.fillText(currentLabel, W - 40, H - 60);
 
-        // --- Credits overlays ---
+        // Credits
         const badgePadX = 14,
           badgePadY = 10,
           badgeRadius = 14;
@@ -944,7 +1245,6 @@
           pctx.fillText(txt, bx, by);
         }
 
-        // Made by (top-right)
         const madeByNameNow = (madeByInput?.value || "").trim();
         const showMadeByNow = !!creditMadeByChk?.checked;
         if (showMadeByNow && madeByNameNow) {
@@ -1120,8 +1420,11 @@
 
         selectedFont = fontPicker.value;
         sizePercent = parseInt(textSize.value, 10) || 100;
+        translationEdition = translationEditionSel?.value || "en.asad";
         showCreditData = !!creditDataChk?.checked;
         showCreditCreator = !!creditCreatorChk?.checked;
+
+        backgroundMode = bgModeMedia.checked ? "media" : "color";
 
         if (
           !s ||
@@ -1141,7 +1444,7 @@
         totalAyahs = playlist.length;
         meterBar.style.width = "0%";
 
-        statusEl.textContent = `Loaded: ${s.englishName} • Ayah ${sessionFrom}–${sessionTo}`;
+        statusEl.textContent = `Loaded: ${s.englishName} • Ayah ${sessionFrom}–${sessionTo} • Text: ${translationEdition}`;
         await playIndex(index, true);
       });
 
@@ -1207,7 +1510,7 @@
 
         try {
           const tRes = await fetchRetry(
-            `https://api.alquran.cloud/v1/ayah/${it.surah}:${it.ayah}/en.asad`
+            `https://api.alquran.cloud/v1/ayah/${it.surah}:${it.ayah}/${translationEdition}`
           );
           const t = await tRes.json();
           currentText =
@@ -1264,8 +1567,11 @@
         if (textSizeVal) textSizeVal.textContent = `(${sizePercent}%)`;
         bgColor = bgColorInput.value;
         fontColor = fontColorInput.value;
+        translationEdition = translationEditionSel?.value || "en.asad";
         showCreditData = !!creditDataChk?.checked;
         showCreditCreator = !!creditCreatorChk?.checked;
+        applyBgModeUI();
+        await loadBackgroundAssets();
         requestAnimationFrame(drawPreview);
       })();
     </script>

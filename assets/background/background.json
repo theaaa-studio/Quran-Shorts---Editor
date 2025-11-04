@@ -1,0 +1,17 @@
+[
+    {
+        "src": "assets/background/Image1.webp",
+        "type": "image",
+        "name": "Image1"
+    },
+    {
+        "src": "assets/background/Image2.jpg",
+        "type": "image",
+        "name": "Image2"
+    },
+    {
+        "src": "assets/background/mocca_inside.mp4",
+        "type": "video",
+        "name": "Video1"
+    }
+]
