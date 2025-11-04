@@ -355,7 +355,7 @@
 
         <!-- Panel: Input (Row 1 horizontal) -->
         <div class="panel">
-          <h3>Input</h3>
+          <h3>Choose</h3>
           <div class="three-col">
             <div class="field">
               <label class="small" for="surah">Surah</label>
@@ -371,25 +371,66 @@
             </div>
           </div>
 
-          <div class="field">
-            <label class="small" for="reciter">Reciter</label>
-            <select id="reciter">
-              <option value="Abdul_Basit_Mujawwad_128kbps">
-                Abdul Basit (Mujawwad)
-              </option>
-              <option value="Alafasy_128kbps">Mishary Alafasy</option>
-              <option value="Husary_128kbps">Mahmoud Khalil Al-Husary</option>
-              <option value="Hudhaify_128kbps">Ali Al-Hudhaify</option>
-              <option value="Minshawi_Mujawwad_128kbps">
-                Mohamed S. El-Minshawi
-              </option>
-            </select>
+          <!-- Reciter + Translation side by side -->
+          <div class="two-col-inline">
+            <div class="field">
+              <label class="small" for="reciter">Reciter (with language)</label>
+              <select id="reciter">
+                <!-- Arabic reciters -->
+                <option value="Abdul_Basit_Mujawwad_128kbps">
+                  Abdul Basit — Mujawwad (Arabic)
+                </option>
+                <option value="Alafasy_128kbps">
+                  Mishary Alafasy (Arabic)
+                </option>
+                <option value="Husary_128kbps">
+                  Mahmoud Khalil Al-Husary (Arabic)
+                </option>
+                <option value="Hudhaify_128kbps">
+                  Ali Al-Hudhaify (Arabic)
+                </option>
+                <option value="Minshawi_Mujawwad_128kbps">
+                  Mohamed S. El-Minshawi (Arabic)
+                </option>
+                <!-- To add other-language narration sets from EveryAyah, insert here once the exact folder names are confirmed. -->
+              </select>
+            </div>
+
+            <div class="field">
+              <label class="small" for="translationEdition"
+                >Translation (text) edition</label
+              >
+              <select id="translationEdition">
+                <!-- English -->
+                <option value="en.asad">English — Muhammad Asad</option>
+                <option value="en.sahih">English — Sahih International</option>
+                <option value="en.pickthall">English — Pickthall</option>
+                <option value="en.yusufali">English — Yusuf Ali</option>
+                <!-- Bengali / Bangla -->
+                <option value="bn.bengali">
+                  Bengali — Bengali Translation
+                </option>
+                <!-- Urdu -->
+                <option value="ur.jalandhry">
+                  Urdu — Fateh Muhammad Jalandhry
+                </option>
+                <!-- Indonesian -->
+                <option value="id.indonesian">
+                  Indonesian — Bahasa Indonesia
+                </option>
+                <!-- French -->
+                <option value="fr.hamidullah">
+                  French — Muhammad Hamidullah
+                </option>
+              </select>
+            </div>
           </div>
         </div>
 
         <!-- Panel: Typography + Colors (Row 2 horizontal) -->
         <div class="panel">
           <h3>Typography</h3>
+
           <div class="four-col-inline">
             <div class="field">
               <label class="small" for="fontPicker">Font Style</label>
@@ -465,9 +506,10 @@
               </select>
             </div>
             <div class="field">
-              <label class="small" for="textSize">
-                Font Size <span id="textSizeVal" class="name-chip">(100%)</span>
-              </label>
+              <label class="small" for="textSize"
+                >Font Size
+                <span id="textSizeVal" class="name-chip">(100%)</span></label
+              >
               <input
                 id="textSize"
                 type="range"
@@ -486,24 +528,12 @@
               <input id="bgColor" type="color" value="#ffffff" />
             </div>
           </div>
-          <p class="hint">Set your font, size, and colors in one row.</p>
         </div>
 
         <!-- Panel: Credits (Row 3 horizontal) -->
         <div class="panel">
           <h3>Credits</h3>
           <div class="four-col-inline">
-            <label
-              class="toggle"
-              title="Show attribution to data/audio providers on the video"
-            >
-              <input type="checkbox" id="creditData" checked />
-              <span>Show Data Source Credit</span>
-            </label>
-            <label class="toggle" title="Show your creator tag on the video">
-              <input type="checkbox" id="creditCreator" checked />
-              <span>Show Editor Creator Credit (TheAAA)</span>
-            </label>
             <div class="field">
               <label class="small" for="madeByInput">Made by (name)</label>
               <input
@@ -518,20 +548,27 @@
               title="Show a Made by badge in the top-right of the Short"
             >
               <input type="checkbox" id="creditMadeBy" checked />
-              <span>Show Made by</span>
+              <span>Made by</span>
+            </label>
+            <label
+              class="toggle"
+              title="Show attribution to data/audio providers on the video"
+            >
+              <input type="checkbox" id="creditData" checked />
+              <span>Data Source</span>
+            </label>
+            <label class="toggle" title="Show your creator tag on the video">
+              <input type="checkbox" id="creditCreator" checked />
+              <span>Editor Developer</span>
             </label>
           </div>
-          <p class="status">
-            These credits appear as subtle watermarks on the exported video. You
-            can turn them off.
-          </p>
         </div>
 
         <!-- Panel: Playback & Export (Row 4 horizontal) -->
         <div class="panel">
           <h3>Playback & Export</h3>
           <div class="transport">
-            <button id="buildPreviewBtn" class="btn">Load & Play</button>
+            <button id="buildPreviewBtn" class="btn">Play & Export</button>
             <button id="downloadBtn" class="btn" disabled>
               Download (WebM)
             </button>
@@ -603,6 +640,8 @@
       const bgColorInput = $("#bgColor");
       const fontColorInput = $("#fontColor");
 
+      const translationEditionSel = $("#translationEdition");
+
       const creditDataChk = $("#creditData");
       const creditCreatorChk = $("#creditCreator");
       const madeByInput = $("#madeByInput");
@@ -633,9 +672,10 @@
       // text controls
       let selectedFont = "Inter, sans-serif";
       let sizePercent = 100; // 25–160
+      let translationEdition = "en.asad"; // NEW: default text translation
 
       // drawing content
-      let currentText = "Centered English translation will appear here.";
+      let currentText = "Centered translation will appear here.";
       let currentLabel = "—";
       let bgColor = "#ffffff";
       let fontColor = "#111111";
@@ -687,6 +727,7 @@
         if (textSizeVal) textSizeVal.textContent = `(${sizePercent}%)`;
         if (bgColorInput) bgColor = bgColorInput.value;
         if (fontColorInput) fontColor = fontColorInput.value;
+        translationEdition = translationEditionSel?.value || "en.asad"; // NEW
         showCreditData = !!creditDataChk?.checked;
         showCreditCreator = !!creditCreatorChk?.checked;
       }
@@ -702,6 +743,7 @@
         creditCreatorChk,
         bgColorInput,
         fontColorInput,
+        translationEditionSel,
       ]
         .filter(Boolean)
         .forEach((el) => {
@@ -1120,6 +1162,7 @@
 
         selectedFont = fontPicker.value;
         sizePercent = parseInt(textSize.value, 10) || 100;
+        translationEdition = translationEditionSel?.value || "en.asad"; // NEW
         showCreditData = !!creditDataChk?.checked;
         showCreditCreator = !!creditCreatorChk?.checked;
 
@@ -1141,7 +1184,7 @@
         totalAyahs = playlist.length;
         meterBar.style.width = "0%";
 
-        statusEl.textContent = `Loaded: ${s.englishName} • Ayah ${sessionFrom}–${sessionTo}`;
+        statusEl.textContent = `Loaded: ${s.englishName} • Ayah ${sessionFrom}–${sessionTo} • Text: ${translationEdition}`;
         await playIndex(index, true);
       });
 
@@ -1207,8 +1250,8 @@
 
         try {
           const tRes = await fetchRetry(
-            `https://api.alquran.cloud/v1/ayah/${it.surah}:${it.ayah}/en.asad`
-          );
+            `https://api.alquran.cloud/v1/ayah/${it.surah}:${it.ayah}/${translationEdition}`
+          ); // NEW: edition
           const t = await tRes.json();
           currentText =
             t && t.code === 200 && t.data && t.data.text
@@ -1262,8 +1305,9 @@
         selectedFont = fontPicker.value;
         sizePercent = parseInt(textSize.value, 10) || 100;
         if (textSizeVal) textSizeVal.textContent = `(${sizePercent}%)`;
-        bgColor = bgColorInput.value;
-        fontColor = fontColorInput.value;
+        bgColor = fontColorInput.value;
+        fontColor = fontColorInput.value; // minor init
+        translationEdition = translationEditionSel?.value || "en.asad"; // NEW
         showCreditData = !!creditDataChk?.checked;
         showCreditCreator = !!creditCreatorChk?.checked;
         requestAnimationFrame(drawPreview);
