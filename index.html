@@ -369,6 +369,11 @@
         opacity: 0.8;
         font-size: 11px;
       }
+      .preview-controls {
+        display: flex;
+        justify-content: center;
+        gap: 12px;
+      }
     </style>
   </head>
   <body>
@@ -636,14 +641,12 @@
             <button id="downloadBtn" class="btn" disabled>
               Download (WebM)
             </button>
-            <button id="prevBtn" class="btn ghost">Prev</button>
-            <button id="playPauseBtn" class="btn ghost">Play</button>
-            <button id="nextBtn" class="btn ghost">Next</button>
           </div>
+
           <div class="two-col-inline">
-            <div class="status" id="status">Ready.</div>
+            <!-- <div class="status" id="status">Ready.</div> -->
             <div class="status" id="recStatus">
-              Idle. Press “Load & Play” to preview & auto-record.
+              Idle. Press Play & Export to preview & auto-record.
             </div>
           </div>
           <div class="meter"><span id="meterBar"></span></div>
@@ -663,6 +666,11 @@
             aria-label="Shorts Preview"
           ></canvas>
         </div>
+
+        <div class="preview-controls">
+          <button id="previewPlayBtn" class="btn ghost">Load & Play</button>
+        </div>
+
         <audio id="audioPlayer" controls preload="metadata"></audio>
       </main>
     </div>
@@ -724,13 +732,11 @@
       const pctx = previewCanvas.getContext("2d");
 
       const buildPreviewBtn = $("#buildPreviewBtn");
-      const prevBtn = $("#prevBtn");
-      const playPauseBtn = $("#playPauseBtn");
-      const nextBtn = $("#nextBtn");
       const downloadBtn = $("#downloadBtn");
+      const previewPlayBtn = $("#previewPlayBtn");
 
       const audio = $("#audioPlayer");
-      const statusEl = $("#status");
+      //const statusEl = $("#status");
       const recStatus = $("#recStatus");
       const meterBar = $("#meterBar");
 
@@ -779,6 +785,9 @@
       let recordingStarted = false;
       let finalBlob = null;
 
+      // gate: only record when explicitly allowed
+      let allowRecording = true;
+
       // progress
       let totalAyahs = 0;
 
@@ -799,9 +808,9 @@
         chunks = [];
         finalBlob = null;
         downloadBtn.disabled = true;
-        statusEl.textContent = "Ready.";
+        // statusEl.textContent = "Ready.";
         recStatus.textContent =
-          "Idle. Press “Load & Play” to preview & auto-record.";
+          "Idle. Press Play & Export to preview & auto-record.";
         meterBar.style.width = "0%";
       }
 
@@ -876,7 +885,7 @@
       // ------------------ Metadata ------------------
       async function loadMeta() {
         try {
-          statusEl.textContent = "Loading surah list…";
+          // statusEl.textContent = "Loading surah list…";
           const m = await (
             await fetchRetry("https://api.alquran.cloud/v1/meta")
           ).json();
@@ -902,10 +911,10 @@
             )
             .join("");
           updateAyahRange();
-          statusEl.textContent = "Ready.";
+          // statusEl.textContent = "Ready.";
         } catch (err) {
           console.error(err);
-          statusEl.textContent = "Failed to load metadata. Check your network.";
+          //statusEl.textContent = "Failed to load metadata. Check your network.";
         }
       }
 
@@ -1365,7 +1374,7 @@
           });
         } catch (e) {
           console.error("MediaRecorder init failed:", e);
-          statusEl.textContent = "MediaRecorder not supported by this browser.";
+          // statusEl.textContent = "MediaRecorder not supported by this browser.";
           return;
         }
         chunks = [];
@@ -1380,10 +1389,11 @@
           downloadBtn.disabled = false;
           recStatus.textContent =
             "Recording complete. You can download your Short.";
-          statusEl.textContent = "Recording complete. Click “Download (WebM)”.";
+          //statusEl.textContent = "Recording complete. Click “Download (WebM)”.";
         };
       }
       function startRecordingIfNeeded() {
+        if (!allowRecording) return; // 🔒 skip when preview-only
         if (!recorder) initRecorder();
         if (!recorder) return;
         if (!recordingStarted && recorder.state !== "recording") {
@@ -1398,6 +1408,7 @@
           }
         }
       }
+
       function stopRecordingIfActive() {
         if (recorder && recorder.state === "recording") {
           try {
@@ -1407,7 +1418,9 @@
       }
 
       // ------------------ Playback controls ------------------
-      buildPreviewBtn.addEventListener("click", async () => {
+      async function loadAndPlay({ record }) {
+        allowRecording = !!record;
+
         resetSessionUI();
         sessionSurah = +surahSel.value || 1;
         const s =
@@ -1434,7 +1447,7 @@
           sessionTo > s.ayahCount ||
           sessionFrom > sessionTo
         ) {
-          statusEl.textContent = "Invalid ayah range.";
+          // statusEl.textContent = "Invalid ayah range.";
           return;
         }
         playlist = [];
@@ -1444,26 +1457,18 @@
         totalAyahs = playlist.length;
         meterBar.style.width = "0%";
 
-        statusEl.textContent = `Loaded: ${s.englishName} • Ayah ${sessionFrom}–${sessionTo} • Text: ${translationEdition}`;
+        //  statusEl.textContent = `Loaded: ${s.englishName} • Ayah ${sessionFrom}–${sessionTo} • Text: ${translationEdition}`;
         await playIndex(index, true);
+      }
+
+      // Play & Export -> record = true
+      buildPreviewBtn.addEventListener("click", async () => {
+        loadAndPlay({ record: true });
       });
 
-      prevBtn.addEventListener("click", async () => {
-        if (!playlist.length) return;
-        index = Math.max(0, index - 1);
-        await playIndex(index, true);
-        updateMeter();
-      });
-      nextBtn.addEventListener("click", async () => {
-        if (!playlist.length) return;
-        index = Math.min(playlist.length - 1, index + 1);
-        await playIndex(index, true);
-        updateMeter();
-      });
-      playPauseBtn.addEventListener("click", () => {
-        if (!playlist.length) return;
-        if (isPlaying) audio.pause();
-        else audio.play().catch(() => {});
+      // Load & Play in preview -> record = false
+      previewPlayBtn.addEventListener("click", async () => {
+        loadAndPlay({ record: false });
       });
 
       function updateMeter() {
@@ -1478,16 +1483,16 @@
 
       audio.addEventListener("play", () => {
         isPlaying = true;
-        playPauseBtn.textContent = "Pause";
         try {
           audioCtx && audioCtx.resume && audioCtx.resume();
         } catch {}
-        startRecordingIfNeeded();
+        if (allowRecording) startRecordingIfNeeded();
       });
+
       audio.addEventListener("pause", () => {
         isPlaying = false;
-        playPauseBtn.textContent = "Play";
       });
+
       audio.addEventListener("ended", async () => {
         if (index < playlist.length - 1) {
           index++;
@@ -1495,11 +1500,17 @@
           await playIndex(index, true);
         } else {
           isPlaying = false;
-          playPauseBtn.textContent = "Play";
           updateMeter();
           stopRecordingIfActive();
-          statusEl.textContent = "Playback finished. Finalizing recording…";
+          //statusEl.textContent = "Playback finished. Finalizing recording…";
         }
+      });
+
+      // Preview area's "Load & Play" button triggers the same flow as Play & Export
+      // (loads current selections and starts playback/record). If you want it to
+      // play without recording, tell me and I’ll adjust the logic.
+      previewPlayBtn.addEventListener("click", async () => {
+        previewPlayBtn.click();
       });
 
       async function playIndex(i, autoplay = false) {
@@ -1530,7 +1541,7 @@
           try {
             await audio.play();
           } catch {
-            statusEl.textContent = "Autoplay was blocked. Press Play to start.";
+            // statusEl.textContent = "Autoplay was blocked. Press Play to start.";
           }
         }
       }
@@ -1538,7 +1549,7 @@
       // ------------------ Download recorded WebM ------------------
       downloadBtn.addEventListener("click", () => {
         if (!finalBlob) {
-          statusEl.textContent = "No recording available yet.";
+          //   statusEl.textContent = "No recording available yet.";
           return;
         }
         const ts = timestampStr();
