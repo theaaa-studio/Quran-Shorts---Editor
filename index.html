@@ -646,13 +646,11 @@
           <div class="two-col-inline">
             <!-- <div class="status" id="status">Ready.</div> -->
             <div class="status" id="recStatus">
-              Idle. Press Play & Export to preview & auto-record.
+              Press Play & Export to preview & auto-record. Avoid the right
+              audio controller during recording.
             </div>
           </div>
           <div class="meter"><span id="meterBar"></span></div>
-          <div class="version-info">
-            Version 1.0 • Developed by TheAAA • 2025
-          </div>
         </div>
       </aside>
 
@@ -672,6 +670,23 @@
         </div>
 
         <audio id="audioPlayer" controls preload="metadata"></audio>
+        <a
+          href="https://theaaa-studio.github.io/AAA_Personal_Portfolio/"
+          target="_blank"
+          class="version-info"
+        >
+          Version 1.0 • <span class="dev-name">Developed by TheAAA</span> • 2025
+        </a>
+
+        <style>
+          .version-info {
+            text-decoration: none;
+            color: inherit;
+          }
+          .version-info .dev-name {
+            text-decoration: underline;
+          }
+        </style>
       </main>
     </div>
 
@@ -810,7 +825,7 @@
         downloadBtn.disabled = true;
         // statusEl.textContent = "Ready.";
         recStatus.textContent =
-          "Idle. Press Play & Export to preview & auto-record.";
+          "Press Play & Export to preview & auto-record. Avoid the right audio controller during recording.";
         meterBar.style.width = "0%";
       }
 
