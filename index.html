@@ -647,6 +647,8 @@
           <h3>Playback & Export</h3>
           <div class="transport">
             <button id="buildPreviewBtn" class="btn">Play & Export</button>
+            <!-- ✅ ADD: Dismiss button -->
+            <button id="dismissBtn" class="btn ghost" disabled>Dismiss</button>
             <button id="downloadBtn" class="btn" disabled>
               Download (WebM)
             </button>
@@ -679,9 +681,26 @@
             <button id="previewPlayBtn" class="btn ghost">Load & Play</button>
             <button id="previewStopBtn" class="btn ghost">Stop</button>
           </div>
+
+          <!-- ✅ ADD: Volume control row -->
+          <div class="preview-volume">
+            <label for="volumeSlider" class="small" style="color: var(--muted)"
+              >Volume</label
+            >
+            <input
+              id="volumeSlider"
+              type="range"
+              min="0"
+              max="100"
+              value="100"
+            />
+            <span id="volumeVal" class="small" style="color: var(--muted)"
+              >100%</span
+            >
+          </div>
+
           <div id="audioErrorMessage" class="audio-error-message"></div>
         </div>
-
         <style>
           .preview-buttons {
             display: flex;
@@ -695,6 +714,18 @@
             align-items: center;
             gap: 8px;
             width: 100%;
+          }
+          .preview-volume {
+            /* ✅ ADD */
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            justify-content: center;
+            width: 100%;
+          }
+          #volumeSlider {
+            /* ✅ ADD */
+            width: 220px;
           }
           .audio-error-message {
             color: #856404;
@@ -788,9 +819,6 @@
       const bgMediaField = $("#bgMediaField");
       const bgMediaSelect = $("#bgMediaSelect");
       const bgMediaHint = $("#bgMediaHint");
-      const bgFolderPicker = $("#bgFolderPicker");
-      const bgFolderBtn = $("#bgFolderBtn");
-      // ✅ ADD
       const bgUploadInput = $("#bgUploadInput");
 
       const previewCanvas = $("#previewCanvas");
@@ -799,12 +827,15 @@
       const buildPreviewBtn = $("#buildPreviewBtn");
       const downloadBtn = $("#downloadBtn");
       const previewPlayBtn = $("#previewPlayBtn");
+      const dismissBtn = $("#dismissBtn");
+
+      // Volume UI
+      const volumeSlider = $("#volumeSlider");
+      const volumeVal = $("#volumeVal");
 
       const audio = $("#audioPlayer");
-      //const statusEl = $("#status");
       const recStatus = $("#recStatus");
       const meterBar = $("#meterBar");
-
       audio.crossOrigin = "anonymous";
 
       // ------------------ State ------------------
@@ -843,13 +874,17 @@
       // recording state
       let audioCtx = null,
         srcNode = null,
+        gainNode = null,
         destNode = null,
-        mixedStream = null;
+        mixedStream = null,
+        connections = { toDest: false, toRecorder: false };
+
       let recorder = null;
       let chunks = [];
       let recordingStarted = false;
       let finalBlob = null;
-      let hasAudioError = false; // Flag to track if audio error occurred
+      let hasAudioError = false;
+      let wasDismissed = false;
 
       // gate: only record when explicitly allowed
       let allowRecording = true;
@@ -864,6 +899,14 @@
         sessionTo = 1,
         sessionReciterName = "Unknown";
 
+      // ------------------ UI toggle helper ------------------
+      function setDuringRecordingUI(active) {
+        const stopBtn = document.getElementById("previewStopBtn");
+        if (dismissBtn) dismissBtn.disabled = !active;
+        if (previewPlayBtn) previewPlayBtn.disabled = !!active;
+        if (stopBtn) stopBtn.disabled = !!active;
+      }
+
       // ------------------ Change handling ------------------
       function resetSessionUI() {
         try {
@@ -874,10 +917,10 @@
         chunks = [];
         finalBlob = null;
         downloadBtn.disabled = true;
-        // statusEl.textContent = "Ready.";
         recStatus.textContent =
           "Press Play & Export to preview & auto-record. Avoid the right audio controller during recording.";
         meterBar.style.width = "0%";
+        setDuringRecordingUI(false);
       }
 
       function onAnyInputChange() {
@@ -951,7 +994,6 @@
       // ------------------ Metadata ------------------
       async function loadMeta() {
         try {
-          // statusEl.textContent = "Loading surah list…";
           const m = await (
             await fetchRetry("https://api.alquran.cloud/v1/meta")
           ).json();
@@ -977,10 +1019,8 @@
             )
             .join("");
           updateAyahRange();
-          // statusEl.textContent = "Ready.";
         } catch (err) {
           console.error(err);
-          //statusEl.textContent = "Failed to load metadata. Check your network.";
         }
       }
 
@@ -1028,7 +1068,6 @@
           : "image";
       }
 
-      // 🔁 CHANGE: now combines userUploads + provided list
       function populateSelectFromList(list) {
         const combined = [
           ...userUploads,
@@ -1061,18 +1100,15 @@
         bgMediaHint.textContent = `Available: ${bgMediaList.length} item(s). ${
           userUploads.length ? `(${userUploads.length} from your uploads)` : ""
         }`;
-        // If nothing is selected yet, default to first item
         if (bgMediaSelect.value === "" || bgMediaSelect.value == null) {
           bgMediaSelect.value = "0";
         }
         onBgMediaChange();
       }
 
-      // ✅ ADD: turn FileList into playable items & refresh the select
       function handleUserFiles(fileList) {
         if (!fileList || !fileList.length) return;
 
-        // revoke old blob urls (fresh set replaces previous uploads)
         revokeUserUploadURLs();
         userUploads = [];
 
@@ -1090,16 +1126,13 @@
           });
         }
 
-        // mix uploads with any configured items
         populateSelectFromList(bgMediaList);
-        // ensure media mode is active so user immediately sees preview change
         if (bgModeMedia && !bgModeMedia.checked) {
           bgModeMedia.checked = true;
           backgroundMode = "media";
           applyBgModeUI();
         }
 
-        // pick first uploaded file by default
         if (userUploads.length) {
           const firstUploadIndex = 0;
           bgMediaSelect.value = String(firstUploadIndex);
@@ -1107,12 +1140,10 @@
         }
       }
 
-      // ✅ ADD: wire the input
       bgUploadInput?.addEventListener("change", (e) => {
         handleUserFiles(e.target.files);
       });
 
-      // ✅ ADD: user uploads state
       let userUploads = []; // [{ src, type, name, __blobUrl: true }]
       function revokeUserUploadURLs() {
         for (const item of userUploads) {
@@ -1125,9 +1156,7 @@
       }
       window.addEventListener("beforeunload", revokeUserUploadURLs);
 
-      // 👉 EDIT THIS ARRAY to list the exact files you placed under assets/background/
-      // Backgrounds now come from assets/background/background.json
-      const DEFAULT_BG_MEDIA = []; // (kept for safe fallback)
+      const DEFAULT_BG_MEDIA = []; // fallback (optional)
 
       async function loadBackgroundAssets() {
         try {
@@ -1135,7 +1164,6 @@
           const res = await fetchRetry("assets/background/background.json");
           const raw = await res.json();
 
-          // Normalize, infer type if missing, filter invalid, allow only allowed extensions
           const normalized = (Array.isArray(raw) ? raw : [])
             .map((it) => {
               const src = it && it.src ? String(it.src) : "";
@@ -1150,7 +1178,6 @@
             .filter(Boolean);
 
           if (!normalized.length) {
-            // If JSON empty/invalid, fall back to any hardcoded defaults (optional)
             if (DEFAULT_BG_MEDIA.length) {
               bgMediaHint.textContent = "No items in JSON; using defaults.";
               populateSelectFromList(DEFAULT_BG_MEDIA);
@@ -1180,15 +1207,13 @@
         selectedBg = bgMediaList[idx] || null;
         if (!selectedBg) return;
         if (selectedBg.type === "image") {
-          bgImg.onload = () => {}; // RAF draw will pick it up on next frame
+          bgImg.onload = () => {};
           bgImg.src = selectedBg.src;
         } else {
           try {
             bgVideo.src = selectedBg.src;
             bgVideo.load();
-            bgVideo.play().catch(() => {
-              /* autoplay might be blocked; still renders first frame after load */
-            });
+            bgVideo.play().catch(() => {});
           } catch {}
         }
       }
@@ -1453,7 +1478,15 @@
         requestAnimationFrame(drawPreview);
       }
 
-      // ------------------ Recording setup ------------------
+      // ------------------ Volume helpers ------------------
+      function setVolumeFromSlider() {
+        const v = Math.max(0, Math.min(100, Number(volumeSlider?.value) || 0));
+        if (volumeVal) volumeVal.textContent = `${v}%`;
+        audio.volume = v / 100; // playback loudness
+        if (gainNode) gainNode.gain.value = v / 100; // recorded loudness
+      }
+
+      // ------------------ Audio graph + routing ------------------
       function ensureAudioGraph() {
         if (audioCtx) return true;
         try {
@@ -1461,18 +1494,79 @@
           if (!AC) return false;
           audioCtx = new AC();
           srcNode = audioCtx.createMediaElementSource(audio);
+          gainNode = audioCtx.createGain();
           destNode = audioCtx.createMediaStreamDestination();
-          srcNode.connect(audioCtx.destination);
-          srcNode.connect(destNode);
+
+          // Start with slider value
+          gainNode.gain.value = (Number(volumeSlider?.value) || 100) / 100;
+
+          // Base connection
+          srcNode.connect(gainNode);
+
+          // We'll route to speakers/recorder via updateAudioRouting()
+          connections = { toDest: false, toRecorder: false };
+          updateAudioRouting();
+
           return true;
         } catch (e) {
           console.warn("Audio graph unavailable (CORS or browser):", e);
           audioCtx = null;
           srcNode = null;
+          gainNode = null;
           destNode = null;
+          // Fallback: element audio will be heard
+          // audio.muted = false;
+          audio.volume = (Number(volumeSlider?.value) || 100) / 100;
           return false;
         }
       }
+
+      // Replace your entire updateAudioRouting() with this:
+      function updateAudioRouting() {
+        if (!gainNode || !audioCtx) return;
+
+        // Safely connect/disconnect helpers
+        const connect = (node, target) => {
+          try {
+            node.connect(target);
+          } catch (_) {}
+        };
+        const disconnect = (node, target) => {
+          try {
+            node.disconnect(target);
+          } catch (_) {}
+        };
+
+        // Reset previous routes
+        if (audioCtx.destination) disconnect(gainNode, audioCtx.destination);
+        if (destNode) disconnect(gainNode, destNode);
+
+        // Always monitor to speakers
+        if (audioCtx.destination) connect(gainNode, audioCtx.destination);
+
+        // Additionally feed the recorder only when recording
+        if (allowRecording && destNode) connect(gainNode, destNode);
+      }
+
+      async function ensureGraphOnGesture() {
+        if (!audioCtx) {
+          const ok = ensureAudioGraph();
+          if (!ok) {
+            // audio.muted = false;
+            return false;
+          }
+        }
+        if (audioCtx.state === "suspended") {
+          try {
+            await audioCtx.resume();
+          } catch {}
+        }
+        // Always keep element audible
+        // audio.muted = false;
+        return true;
+      }
+
+      // ------------------ Recording setup ------------------
       function buildMixedStream() {
         const fps = 30;
         const canvasStream = previewCanvas.captureStream(fps);
@@ -1483,8 +1577,10 @@
             ...destNode.stream.getAudioTracks(),
           ]);
         }
+        // Fallback: no audio track if WebAudio not available/CORS-blocked
         return new MediaStream([...canvasStream.getTracks()]);
       }
+
       function pickMime() {
         const candidates = [
           "video/webm;codecs=vp9,opus",
@@ -1501,6 +1597,7 @@
         }
         return "";
       }
+
       function initRecorder() {
         if (recorder) return;
         mixedStream = buildMixedStream();
@@ -1512,7 +1609,6 @@
           });
         } catch (e) {
           console.error("MediaRecorder init failed:", e);
-          // statusEl.textContent = "MediaRecorder not supported by this browser.";
           return;
         }
         chunks = [];
@@ -1524,21 +1620,28 @@
         };
         recorder.onstop = () => {
           finalBlob = new Blob(chunks, { type: mime || "video/webm" });
-          // Only enable download button if there was no audio error
-          if (!hasAudioError) {
+
+          if (!hasAudioError && !wasDismissed) {
             downloadBtn.disabled = false;
             recStatus.textContent =
               "Recording complete. You can download your Short.";
           } else {
             downloadBtn.disabled = true;
-            recStatus.textContent =
-              "Recording incomplete due to audio error. Download disabled.";
+            recStatus.textContent = wasDismissed
+              ? "Dismissed. Ready."
+              : "Recording incomplete due to audio error. Download disabled.";
           }
-          //statusEl.textContent = "Recording complete. Click “Download (WebM)”.";
+
+          setDuringRecordingUI(false);
         };
       }
+
       function startRecordingIfNeeded() {
-        if (!allowRecording) return; // 🔒 skip when preview-only
+        if (!allowRecording) return;
+
+        // Ensure recorder path is connected
+        if (audioCtx && gainNode) updateAudioRouting();
+
         if (!recorder) initRecorder();
         if (!recorder) return;
         if (!recordingStarted && recorder.state !== "recording") {
@@ -1553,7 +1656,6 @@
           }
         }
       }
-
       function stopRecordingIfActive() {
         if (recorder && recorder.state === "recording") {
           try {
@@ -1564,28 +1666,41 @@
 
       // ------------------ Playback controls ------------------
       async function loadAndPlay({ record }) {
+        // Mode flag
         allowRecording = !!record;
 
+        // UI & flags
         resetSessionUI();
-        // Reset audio error flag
+        setDuringRecordingUI(!!record);
+        wasDismissed = false;
         hasAudioError = false;
-        // Clear any previous error message and reset states
-        const errorMessage = $("#audioErrorMessage");
-        errorMessage.style.display = "none";
 
-        // Ensure recording is stopped and state is reset
+        // Clear any prior audio error banner
+        const errorMessage = $("#audioErrorMessage");
+        if (errorMessage) {
+          errorMessage.textContent = "";
+          errorMessage.style.display = "none";
+        }
+
+        // Ensure WebAudio, wire routes, apply current volume (no muting anywhere)
+        await ensureGraphOnGesture();
+        updateAudioRouting();
+        setVolumeFromSlider(); // sets audio.volume and gainNode.gain to slider %
+
+        // Recorder buffers
         stopRecordingIfActive();
         recordingStarted = false;
         chunks = [];
         finalBlob = null;
         downloadBtn.disabled = true;
 
+        // ---- Read selections ----
         sessionSurah = +surahSel.value || 1;
         const s =
           meta.surahs.find((x) => x.number === sessionSurah) || meta.surahs[0];
         sessionSurahName = s?.englishName || "Unknown";
         sessionFrom = +ayahStartSel.value || 1;
-        sessionTo = +ayahEndSel.value || Math.min(5, s.ayahCount);
+        sessionTo = +ayahEndSel.value || Math.min(5, s?.ayahCount || 5);
         sessionReciterName =
           reciterSel.options[reciterSel.selectedIndex]?.text || "Unknown";
 
@@ -1594,38 +1709,48 @@
         translationEdition = translationEditionSel?.value || "en.asad";
         showCreditData = !!creditDataChk?.checked;
         showCreditCreator = !!creditCreatorChk?.checked;
-
         backgroundMode = bgModeMedia.checked ? "media" : "color";
 
+        // ---- Validate ----
         if (
           !s ||
-          isNaN(sessionFrom) ||
-          isNaN(sessionTo) ||
+          Number.isNaN(sessionFrom) ||
+          Number.isNaN(sessionTo) ||
           sessionFrom < 1 ||
           sessionTo > s.ayahCount ||
           sessionFrom > sessionTo
         ) {
-          // statusEl.textContent = "Invalid ayah range.";
+          recStatus.textContent =
+            "Invalid ayah range. Please adjust the selection.";
+          setDuringRecordingUI(false);
           return;
         }
+
+        // ---- Playlist ----
         playlist = [];
-        for (let a = sessionFrom; a <= sessionTo; a++)
+        for (let a = sessionFrom; a <= sessionTo; a++) {
           playlist.push({ surah: sessionSurah, ayah: a, sName: s.englishName });
+        }
         index = 0;
         totalAyahs = playlist.length;
-        meterBar.style.width = "0%";
 
-        //  statusEl.textContent = `Loaded: ${s.englishName} • Ayah ${sessionFrom}–${sessionTo} • Text: ${translationEdition}`;
+        meterBar.style.width = "0%";
         await playIndex(index, true);
       }
 
-      // Play & Export -> record = true
       buildPreviewBtn.addEventListener("click", async () => {
+        await ensureGraphOnGesture();
+        allowRecording = true;
+        updateAudioRouting();
+        setVolumeFromSlider();
         loadAndPlay({ record: true });
       });
 
-      // Load & Play in preview -> record = false
       previewPlayBtn.addEventListener("click", async () => {
+        await ensureGraphOnGesture();
+        allowRecording = false;
+        updateAudioRouting();
+        setVolumeFromSlider();
         loadAndPlay({ record: false });
       });
 
@@ -1634,9 +1759,9 @@
       previewStopBtn.addEventListener("click", () => {
         if (audio) {
           audio.pause();
-          audio.currentTime = 0; // Reset to beginning
-          index = 0; // Reset playlist index
-          updateMeter(); // Reset progress meter
+          audio.currentTime = 0;
+          index = 0;
+          updateMeter();
           isPlaying = false;
           if (recorder && recorder.state === "recording") {
             stopRecordingIfActive();
@@ -1654,18 +1779,15 @@
         meterBar.style.width = pct + "%";
       }
 
-      audio.addEventListener("play", () => {
+      audio.addEventListener("play", async () => {
         isPlaying = true;
-        try {
-          audioCtx && audioCtx.resume && audioCtx.resume();
-        } catch {}
+        await ensureGraphOnGesture();
+        updateAudioRouting();
         if (allowRecording) startRecordingIfNeeded();
       });
-
       audio.addEventListener("pause", () => {
         isPlaying = false;
       });
-
       audio.addEventListener("ended", async () => {
         if (index < playlist.length - 1) {
           index++;
@@ -1675,15 +1797,7 @@
           isPlaying = false;
           updateMeter();
           stopRecordingIfActive();
-          //statusEl.textContent = "Playback finished. Finalizing recording…";
         }
-      });
-
-      // Preview area's "Load & Play" button triggers the same flow as Play & Export
-      // (loads current selections and starts playback/record). If you want it to
-      // play without recording, tell me and I’ll adjust the logic.
-      previewPlayBtn.addEventListener("click", async () => {
-        previewPlayBtn.click();
       });
 
       async function playIndex(i, autoplay = false) {
@@ -1713,51 +1827,51 @@
         const errorMessage = $("#audioErrorMessage");
         errorMessage.style.display = "none";
 
-        // Set up audio error handling
+        // Audio error handling
         audio.onerror = () => {
+          const errorMessage = $("#audioErrorMessage");
           errorMessage.textContent = `⚠️ Failed to load audio for Surah ${it.surah}, Ayah ${it.ayah}`;
           errorMessage.style.display = "block";
 
-          // Set audio error flag
           hasAudioError = true;
 
-          // Stop recording if it's active
           if (recorder && recorder.state === "recording") {
-            recorder.stop();
-            // Clear any partial recording
+            try {
+              recorder.stop();
+            } catch {}
             chunks = [];
             finalBlob = null;
           }
 
-          // Reset recording state
           recordingStarted = false;
-          recorder = null; // Destroy the recorder instance
-          downloadBtn.disabled = true; // Ensure download stays disabled
-
-          // Reset playback state
+          recorder = null;
+          downloadBtn.disabled = true;
           isPlaying = false;
 
-          // Update status
           recStatus.textContent = "Recording stopped due to audio error.";
+          setDuringRecordingUI(false);
         };
 
         audio.src = audioUrl;
-        if (!recorder) initRecorder();
+
+        if (!recorder && allowRecording) initRecorder();
         if (autoplay) {
           try {
             await audio.play();
-          } catch {
-            // statusEl.textContent = "Autoplay was blocked. Press Play to start.";
+          } catch (err) {
+            console.warn("audio.play() was blocked:", err);
+            const errorMessage = $("#audioErrorMessage");
+            if (errorMessage) {
+              errorMessage.textContent = `⚠️ Failed to load audio for Surah ${it.surah}, Ayah ${it.ayah}`;
+              errorMessage.style.display = "block";
+            }
           }
         }
       }
 
       // ------------------ Download recorded WebM ------------------
       downloadBtn.addEventListener("click", () => {
-        if (!finalBlob) {
-          //   statusEl.textContent = "No recording available yet.";
-          return;
-        }
+        if (!finalBlob) return;
         const ts = timestampStr();
         const filename = `Surah-${sessionSurah}-${safe(
           sessionSurahName
@@ -1776,6 +1890,30 @@
         }, 1000);
       });
 
+      // ------------------ Dismiss behavior ------------------
+      dismissBtn?.addEventListener("click", () => {
+        wasDismissed = true;
+        try {
+          if (audio) {
+            audio.pause();
+            audio.currentTime = 0;
+          }
+          stopRecordingIfActive();
+        } catch {}
+        chunks = [];
+        finalBlob = null;
+        downloadBtn.disabled = true;
+        recStatus.textContent = "Dismissed. Ready.";
+        setDuringRecordingUI(false);
+      });
+
+      // ------------------ Volume slider wiring ------------------
+      volumeSlider?.addEventListener("input", async () => {
+        await ensureGraphOnGesture();
+        setVolumeFromSlider();
+        // routing unchanged, element remains audible
+      });
+
       // ------------------ Init ------------------
       (async () => {
         await loadMeta();
@@ -1789,6 +1927,13 @@
         showCreditCreator = !!creditCreatorChk?.checked;
         applyBgModeUI();
         await loadBackgroundAssets();
+        setDuringRecordingUI(false);
+
+        // Volume UI defaults
+        if (volumeVal) volumeVal.textContent = `${volumeSlider?.value || 100}%`;
+        audio.volume = (Number(volumeSlider?.value) || 100) / 100;
+        // audio.muted = false; // ensure always audible
+
         requestAnimationFrame(drawPreview);
       })();
     </script>
