@@ -499,6 +499,15 @@
                 >Using configured media list.</span
               >
 
+              <!-- ✅ ADD: user media uploader -->
+              <input
+                id="bgUploadInput"
+                type="file"
+                accept="image/*,video/*"
+                multiple
+                style="margin-top: 8px"
+              />
+
               <input
                 style="display: none"
                 id="bgFolderPicker"
@@ -646,14 +655,11 @@
           <div class="two-col-inline">
             <!-- <div class="status" id="status">Ready.</div> -->
             <div class="status" id="recStatus">
-              Idle. Press Play & Export to preview & auto-record. While recoding
-              do not touch the audio controller on the right.
+              Press Play & Export to preview & auto-record. Avoid the right
+              audio controller during recording.
             </div>
           </div>
           <div class="meter"><span id="meterBar"></span></div>
-          <div class="version-info">
-            Version 1.0 • Developed by TheAAA • 2025
-          </div>
         </div>
       </aside>
 
@@ -669,10 +675,66 @@
         </div>
 
         <div class="preview-controls">
-          <button id="previewPlayBtn" class="btn ghost">Load & Play</button>
+          <div class="preview-buttons">
+            <button id="previewPlayBtn" class="btn ghost">Load & Play</button>
+            <button id="previewStopBtn" class="btn ghost">Stop</button>
+          </div>
+          <div id="audioErrorMessage" class="audio-error-message"></div>
         </div>
 
-        <audio id="audioPlayer" controls preload="metadata"></audio>
+        <style>
+          .preview-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            width: 100%;
+          }
+          .preview-controls {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            width: 100%;
+          }
+          .audio-error-message {
+            color: #856404;
+            font-size: 14px;
+            display: none;
+            text-align: center;
+            max-width: 80%;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin: 0 auto;
+          }
+        </style>
+
+        <audio
+          id="audioPlayer"
+          controls
+          preload="metadata"
+          style="display: none"
+        ></audio>
+        <a
+          href="https://theaaa-studio.github.io/AAA_Personal_Portfolio/"
+          target="_blank"
+          class="version-info"
+        >
+          Version 1.0 • <span class="dev-name">Developed by TheAAA</span> • 2025
+        </a>
+
+        <style>
+          .version-info {
+            text-decoration: none;
+            color: inherit;
+          }
+          .version-info .dev-name {
+            text-decoration: underline;
+          }
+          #audioPlayer {
+            display: none;
+          }
+        </style>
       </main>
     </div>
 
@@ -728,6 +790,8 @@
       const bgMediaHint = $("#bgMediaHint");
       const bgFolderPicker = $("#bgFolderPicker");
       const bgFolderBtn = $("#bgFolderBtn");
+      // ✅ ADD
+      const bgUploadInput = $("#bgUploadInput");
 
       const previewCanvas = $("#previewCanvas");
       const pctx = previewCanvas.getContext("2d");
@@ -785,6 +849,7 @@
       let chunks = [];
       let recordingStarted = false;
       let finalBlob = null;
+      let hasAudioError = false; // Flag to track if audio error occurred
 
       // gate: only record when explicitly allowed
       let allowRecording = true;
@@ -811,7 +876,7 @@
         downloadBtn.disabled = true;
         // statusEl.textContent = "Ready.";
         recStatus.textContent =
-          "Idle. Press Play & Export to preview & auto-record.";
+          "Press Play & Export to preview & auto-record. Avoid the right audio controller during recording.";
         meterBar.style.width = "0%";
       }
 
@@ -963,17 +1028,26 @@
           : "image";
       }
 
+      // 🔁 CHANGE: now combines userUploads + provided list
       function populateSelectFromList(list) {
-        bgMediaList = (list || []).filter(
-          (it) => it.src && (it.type === "image" || it.type === "video")
-        );
+        const combined = [
+          ...userUploads,
+          ...(list || []).filter(
+            (it) => it.src && (it.type === "image" || it.type === "video")
+          ),
+        ];
+
+        bgMediaList = combined;
+
         if (!bgMediaList.length) {
           bgMediaSelect.innerHTML = "";
-          bgMediaHint.textContent = "No media configured.";
+          bgMediaHint.textContent =
+            "No media configured. Upload to get started.";
           bgMediaSelect.disabled = true;
           selectedBg = null;
           return;
         }
+
         bgMediaSelect.innerHTML = bgMediaList
           .map(
             (it, i) =>
@@ -982,11 +1056,74 @@
               }</option>`
           )
           .join("");
+
         bgMediaSelect.disabled = false;
-        bgMediaHint.textContent = `Found ${bgMediaList.length} item(s).`;
-        bgMediaSelect.value = "0";
+        bgMediaHint.textContent = `Available: ${bgMediaList.length} item(s). ${
+          userUploads.length ? `(${userUploads.length} from your uploads)` : ""
+        }`;
+        // If nothing is selected yet, default to first item
+        if (bgMediaSelect.value === "" || bgMediaSelect.value == null) {
+          bgMediaSelect.value = "0";
+        }
         onBgMediaChange();
       }
+
+      // ✅ ADD: turn FileList into playable items & refresh the select
+      function handleUserFiles(fileList) {
+        if (!fileList || !fileList.length) return;
+
+        // revoke old blob urls (fresh set replaces previous uploads)
+        revokeUserUploadURLs();
+        userUploads = [];
+
+        for (const f of fileList) {
+          const url = URL.createObjectURL(f);
+          const isVideo = (f.type || "").startsWith("video");
+          const isImage = (f.type || "").startsWith("image");
+          if (!isVideo && !isImage) continue;
+
+          userUploads.push({
+            src: url,
+            type: isVideo ? "video" : "image",
+            name: `📥 ${f.name}`,
+            __blobUrl: true,
+          });
+        }
+
+        // mix uploads with any configured items
+        populateSelectFromList(bgMediaList);
+        // ensure media mode is active so user immediately sees preview change
+        if (bgModeMedia && !bgModeMedia.checked) {
+          bgModeMedia.checked = true;
+          backgroundMode = "media";
+          applyBgModeUI();
+        }
+
+        // pick first uploaded file by default
+        if (userUploads.length) {
+          const firstUploadIndex = 0;
+          bgMediaSelect.value = String(firstUploadIndex);
+          onBgMediaChange();
+        }
+      }
+
+      // ✅ ADD: wire the input
+      bgUploadInput?.addEventListener("change", (e) => {
+        handleUserFiles(e.target.files);
+      });
+
+      // ✅ ADD: user uploads state
+      let userUploads = []; // [{ src, type, name, __blobUrl: true }]
+      function revokeUserUploadURLs() {
+        for (const item of userUploads) {
+          if (item.__blobUrl && item.src) {
+            try {
+              URL.revokeObjectURL(item.src);
+            } catch {}
+          }
+        }
+      }
+      window.addEventListener("beforeunload", revokeUserUploadURLs);
 
       // 👉 EDIT THIS ARRAY to list the exact files you placed under assets/background/
       // Backgrounds now come from assets/background/background.json
@@ -1423,6 +1560,19 @@
         allowRecording = !!record;
 
         resetSessionUI();
+        // Reset audio error flag
+        hasAudioError = false;
+        // Clear any previous error message and reset states
+        const errorMessage = $("#audioErrorMessage");
+        errorMessage.style.display = "none";
+
+        // Ensure recording is stopped and state is reset
+        stopRecordingIfActive();
+        recordingStarted = false;
+        chunks = [];
+        finalBlob = null;
+        downloadBtn.disabled = true;
+
         sessionSurah = +surahSel.value || 1;
         const s =
           meta.surahs.find((x) => x.number === sessionSurah) || meta.surahs[0];
@@ -1470,6 +1620,21 @@
       // Load & Play in preview -> record = false
       previewPlayBtn.addEventListener("click", async () => {
         loadAndPlay({ record: false });
+      });
+
+      // Stop button
+      const previewStopBtn = $("#previewStopBtn");
+      previewStopBtn.addEventListener("click", () => {
+        if (audio) {
+          audio.pause();
+          audio.currentTime = 0; // Reset to beginning
+          index = 0; // Reset playlist index
+          updateMeter(); // Reset progress meter
+          isPlaying = false;
+          if (recorder && recorder.state === "recording") {
+            stopRecordingIfActive();
+          }
+        }
       });
 
       function updateMeter() {
@@ -1535,8 +1700,41 @@
 
         currentLabel = `${it.sName} • Ayah ${it.ayah}`;
         const reciter = reciterSel.value;
-        audio.src = `https://everyayah.com/data/${reciter}/${s3}${a3}.mp3`;
+        const audioUrl = `https://everyayah.com/data/${reciter}/${s3}${a3}.mp3`;
 
+        // Hide any previous error message
+        const errorMessage = $("#audioErrorMessage");
+        errorMessage.style.display = "none";
+
+        // Set up audio error handling
+        audio.onerror = () => {
+          errorMessage.textContent = `⚠️ Failed to load audio for Surah ${it.surah}, Ayah ${it.ayah}`;
+          errorMessage.style.display = "block";
+
+          // Set audio error flag
+          hasAudioError = true;
+
+          // Stop recording if it's active
+          if (recorder && recorder.state === "recording") {
+            recorder.stop();
+            // Clear any partial recording
+            chunks = [];
+            finalBlob = null;
+          }
+
+          // Reset recording state
+          recordingStarted = false;
+          recorder = null; // Destroy the recorder instance
+          downloadBtn.disabled = true; // Ensure download stays disabled
+
+          // Reset playback state
+          isPlaying = false;
+
+          // Update status
+          recStatus.textContent = "Recording stopped due to audio error.";
+        };
+
+        audio.src = audioUrl;
         if (!recorder) initRecorder();
         if (autoplay) {
           try {
