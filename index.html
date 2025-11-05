@@ -114,7 +114,7 @@
 
       .panel {
         display: grid;
-        gap: 12px;
+        gap: 10px;
         border: 1px solid var(--line);
         border-radius: var(--radius);
         padding: 14px;
@@ -197,6 +197,7 @@
       }
 
       input[type="color"] {
+        width: 48px;
         height: 48px;
         padding: 0;
         cursor: pointer;
@@ -244,17 +245,40 @@
         font-weight: 700;
         padding: 10px 12px;
         border-radius: 10px;
-        box-shadow: 0 10px 28px rgba(124, 92, 255, 0.35);
+        box-shadow: 0 8px 24px rgba(124, 92, 255, 0.35);
+        transition: transform 0.12s ease, box-shadow 0.12s ease;
       }
       .btn.ghost {
         background: #0c1117;
         color: var(--text);
         border: 1px solid var(--line);
-        box-shadow: none;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        transition: transform 0.12s ease, border-color 0.12s ease,
+          box-shadow 0.12s ease;
       }
       .btn:disabled {
         opacity: 0.5;
         cursor: not-allowed;
+        transform: none !important;
+        box-shadow: none !important;
+      }
+      /* Interactive states for buttons */
+      .btn:hover:not(:disabled) {
+        box-shadow: 0 12px 32px rgba(124, 92, 255, 0.45);
+        transform: translateY(-1px);
+      }
+      .btn:active:not(:disabled) {
+        transform: translateY(1px);
+        box-shadow: 0 6px 16px rgba(124, 92, 255, 0.3);
+      }
+      .btn.ghost:hover:not(:disabled) {
+        border-color: var(--accent-1);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        transform: translateY(-1px);
+      }
+      .btn.ghost:active:not(:disabled) {
+        transform: translateY(1px);
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
       }
 
       .status {
@@ -359,7 +383,7 @@
       /* Reasonable input widths so they don’t explode the row */
       .background-panel .inline-row select,
       .background-panel .inline-row input[type="color"] {
-        width: 220px;
+        width: 48px;
       }
 
       /* Nicer hint placement to the far right */
@@ -437,6 +461,131 @@
         white-space: nowrap;
         border: 0;
       }
+
+      /* Light theme overrides (colors only; sizes/shapes unchanged) */
+      html[data-theme="light"] {
+        --bg: #ffffff;
+        --panel: #ffffff;
+        --panel-2: #f6f7fb;
+        --text: #0b1220;
+        --muted: #556778;
+        --line: rgba(11, 18, 32, 0.06);
+        --accent-1: #6b46ff; /* keep accent hues similar */
+        --accent-2: #0891b2;
+
+        /* Override common hard-coded colors to ensure full light-mode coverage */
+      }
+
+      /* Additional per-selector overrides for light mode to catch hard-coded colors */
+      html[data-theme="light"] body {
+        background: radial-gradient(
+            1200px 1200px at 10% -10%,
+            rgba(124, 92, 255, 0.06),
+            transparent 60%
+          ),
+          radial-gradient(
+            1000px 1000px at 110% -10%,
+            rgba(8, 145, 178, 0.04),
+            transparent 55%
+          ),
+          var(--bg);
+        color: var(--text);
+      }
+      html[data-theme="light"] .sidebar {
+        background: linear-gradient(180deg, var(--panel), var(--panel-2));
+        border-right: 1px solid var(--line);
+      }
+      html[data-theme="light"] .panel {
+        background: var(--panel);
+        border: 1px solid var(--line);
+      }
+      html[data-theme="light"] .toggle {
+        background: var(--panel-2);
+        border: 1px solid var(--line);
+      }
+      html[data-theme="light"] select,
+      html[data-theme="light"] button,
+      html[data-theme="light"] input[type="range"],
+      html[data-theme="light"] input[type="color"],
+      html[data-theme="light"] input[type="text"] {
+        background: var(--panel-2);
+        color: var(--text);
+        border: 1px solid var(--line);
+      }
+      html[data-theme="light"] .btn {
+        color: #ffffff; /* keep button text readable on accent */
+        background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+        box-shadow: 0 10px 28px rgba(107, 70, 255, 0.12);
+      }
+      html[data-theme="light"] .btn.ghost {
+        background: var(--panel-2);
+        color: var(--text);
+        border: 1px solid var(--line);
+        box-shadow: none;
+      }
+      html[data-theme="light"] .file-trigger {
+        background: linear-gradient(
+          135deg,
+          rgba(124, 92, 255, 0.06),
+          rgba(8, 145, 178, 0.04)
+        );
+        color: var(--text);
+        border: 1px solid var(--line);
+      }
+      html[data-theme="light"] .file-trigger:hover {
+        box-shadow: 0 8px 24px rgba(107, 70, 255, 0.08);
+        border-color: rgba(107, 70, 255, 0.18);
+      }
+      html[data-theme="light"] #previewCanvas {
+        background: #f7f7f9;
+        border: 1px solid rgba(11, 18, 32, 0.04);
+      }
+      html[data-theme="light"] .preview-stage {
+        background: rgba(11, 18, 32, 0.02);
+        border: 1px dashed var(--line);
+      }
+      html[data-theme="light"] .meter {
+        background: rgba(11, 18, 32, 0.04);
+        border: 1px solid var(--line);
+      }
+
+      /* Theme toggle placed inline with the brand (right side of the brand row) */
+      .brand .theme-toggle {
+        margin-left: auto; /* push to the right side of the .brand row */
+        align-self: center;
+        width: 40px; /* fixed square size */
+        height: 40px; /* fixed square size */
+        padding: 0; /* remove internal padding so it's a square */
+        border-radius: 8px; /* slight rounding for a square button */
+        border: 1px solid var(--line);
+        background: linear-gradient(
+          135deg,
+          rgba(124, 92, 255, 0.06),
+          rgba(34, 211, 238, 0.04)
+        );
+        color: var(--text);
+        cursor: pointer;
+        font-size: 18px; /* slightly larger icon */
+        display: inline-flex;
+        align-items: center;
+        justify-content: center; /* center the icon */
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        transition: transform 0.12s ease, border-color 0.12s ease,
+          box-shadow 0.12s ease;
+      }
+      .brand .theme-toggle:hover {
+        border-color: var(--accent-1);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        transform: translateY(-1px);
+      }
+      .brand .theme-toggle:active {
+        transform: translateY(1px);
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+      }
+      .brand .theme-toggle:focus {
+        outline: none;
+        box-shadow: 0 0 0 4px rgba(124, 92, 255, 0.08);
+      }
     </style>
   </head>
   <body>
@@ -449,6 +598,15 @@
             <p class="title">Quran Shorts — Editor</p>
             <p class="subtitle">Spread the message of Quran in short videos.</p>
           </div>
+          <!-- Theme toggle placed on the same brand row, aligned to the right -->
+          <button
+            id="themeToggle"
+            class="theme-toggle"
+            title="Toggle light / dark theme"
+            aria-pressed="false"
+          >
+            🌙
+          </button>
         </div>
 
         <!-- Panel: Input -->
@@ -549,7 +707,7 @@
             <!-- Solid color picker (shown when 'color' is selected) -->
             <div class="field" id="bgColorField">
               <label class="small" for="bgColor">Background Color</label>
-              <input id="bgColor" type="color" value="#ffffff" />
+              <input id="bgColor" type="color" value="#FBEEE8" />
             </div>
 
             <!-- Media selector (shown when 'media' is selected) -->
@@ -684,7 +842,7 @@
             </div>
             <div class="field">
               <label class="small" for="fontColor">Font Color</label>
-              <input id="fontColor" type="color" value="#111111" />
+              <input id="fontColor" type="color" value="#1f1f1f" />
             </div>
           </div>
         </div>
@@ -724,10 +882,12 @@
         <div class="panel">
           <h3>Playback & Export</h3>
           <div class="transport">
-            <button id="buildPreviewBtn" class="btn">Play & Export</button>
+            <button id="buildPreviewBtn" class="btn ghost">
+              Play & Export
+            </button>
             <!-- ✅ ADD: Dismiss button -->
             <button id="dismissBtn" class="btn ghost" disabled>Dismiss</button>
-            <button id="downloadBtn" class="btn" disabled>
+            <button id="downloadBtn" class="btn ghost" disabled>
               Download (WebM)
             </button>
           </div>
@@ -858,6 +1018,47 @@
           d.getHours()
         )}${z(d.getMinutes())}${z(d.getSeconds())}`;
       };
+
+      // ------------------ Theme (dark / light) ------------------
+      function applyTheme(theme) {
+        const t = theme === "light" ? "light" : "dark";
+        try {
+          document.documentElement.setAttribute("data-theme", t);
+        } catch (e) {}
+        const btn = document.getElementById("themeToggle");
+        if (btn) {
+          btn.textContent = t === "light" ? "☀️" : "🌙";
+          btn.setAttribute("aria-pressed", t === "light" ? "true" : "false");
+        }
+        try {
+          localStorage.setItem("theme", t);
+        } catch (e) {}
+      }
+
+      (function initTheme() {
+        try {
+          const saved = localStorage.getItem("theme");
+          const prefersLight =
+            window.matchMedia &&
+            window.matchMedia("(prefers-color-scheme: light)").matches;
+          const theme = saved || (prefersLight ? "light" : "dark");
+          applyTheme(theme);
+        } catch (e) {
+          /* ignore */
+        }
+      })();
+
+      // Toggle via the button (delegated click handler)
+      document.addEventListener("click", (ev) => {
+        const t = ev.target;
+        if (t && t.id === "themeToggle") {
+          const cur =
+            document.documentElement.getAttribute("data-theme") === "light"
+              ? "light"
+              : "dark";
+          applyTheme(cur === "light" ? "dark" : "light");
+        }
+      });
 
       async function fetchRetry(url, opts = {}, retries = 2) {
         for (let i = 0; i <= retries; i++) {
