@@ -1,17 +1,12 @@
 [
     {
-        "src": "assets/background/Image1.webp",
+        "src": "assets/background/mecca.jpg",
         "type": "image",
-        "name": "Image1"
+        "name": "Mecca"
     },
     {
-        "src": "assets/background/Image2.jpg",
+        "src": "assets/background/medina.jpg",
         "type": "image",
-        "name": "Image2"
-    },
-    {
-        "src": "assets/background/mocca_inside.mp4",
-        "type": "video",
-        "name": "Video1"
+        "name": "Medina"
     }
 ]
