@@ -1524,9 +1524,16 @@
         };
         recorder.onstop = () => {
           finalBlob = new Blob(chunks, { type: mime || "video/webm" });
-          downloadBtn.disabled = false;
-          recStatus.textContent =
-            "Recording complete. You can download your Short.";
+          // Only enable download button if there was no audio error
+          if (!hasAudioError) {
+            downloadBtn.disabled = false;
+            recStatus.textContent =
+              "Recording complete. You can download your Short.";
+          } else {
+            downloadBtn.disabled = true;
+            recStatus.textContent =
+              "Recording incomplete due to audio error. Download disabled.";
+          }
           //statusEl.textContent = "Recording complete. Click “Download (WebM)”.";
         };
       }

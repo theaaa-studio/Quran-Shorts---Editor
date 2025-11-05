@@ -849,6 +849,7 @@
       let chunks = [];
       let recordingStarted = false;
       let finalBlob = null;
+      let hasAudioError = false; // Flag to track if audio error occurred
 
       // gate: only record when explicitly allowed
       let allowRecording = true;
@@ -1523,9 +1524,16 @@
         };
         recorder.onstop = () => {
           finalBlob = new Blob(chunks, { type: mime || "video/webm" });
-          downloadBtn.disabled = false;
-          recStatus.textContent =
-            "Recording complete. You can download your Short.";
+          // Only enable download button if there was no audio error
+          if (!hasAudioError) {
+            downloadBtn.disabled = false;
+            recStatus.textContent =
+              "Recording complete. You can download your Short.";
+          } else {
+            downloadBtn.disabled = true;
+            recStatus.textContent =
+              "Recording incomplete due to audio error. Download disabled.";
+          }
           //statusEl.textContent = "Recording complete. Click “Download (WebM)”.";
         };
       }
@@ -1559,6 +1567,8 @@
         allowRecording = !!record;
 
         resetSessionUI();
+        // Reset audio error flag
+        hasAudioError = false;
         // Clear any previous error message and reset states
         const errorMessage = $("#audioErrorMessage");
         errorMessage.style.display = "none";
@@ -1707,6 +1717,9 @@
         audio.onerror = () => {
           errorMessage.textContent = `⚠️ Failed to load audio for Surah ${it.surah}, Ayah ${it.ayah}`;
           errorMessage.style.display = "block";
+
+          // Set audio error flag
+          hasAudioError = true;
 
           // Stop recording if it's active
           if (recorder && recorder.state === "recording") {
