@@ -1,4 +1,3 @@
-
 // ------------------ Utils ------------------
 const $ = (s) => document.querySelector(s);
 const pad3 = (n) => String(Number(n) || 0).padStart(3, "0");
@@ -350,8 +349,7 @@ function populateSelectFromList(list) {
 
   if (!bgMediaList.length) {
     bgMediaSelect.innerHTML = "";
-    bgMediaHint.textContent =
-      "No media configured. Upload to get started.";
+    bgMediaHint.textContent = "No media configured. Upload to get started.";
     bgMediaSelect.disabled = true;
     selectedBg = null;
     return;
@@ -511,8 +509,7 @@ function fitTextToBox(
     );
     const lineH = Math.round(size * lhRatio);
     const totalH = lines.length * lineH;
-    if (totalH <= maxH)
-      return { fontSize: size, lines, lineHeight: lineH };
+    if (totalH <= maxH) return { fontSize: size, lines, lineHeight: lineH };
     size -= 2;
   }
   return {
@@ -597,11 +594,7 @@ function drawPreview() {
   // Background
   if (backgroundMode === "media" && selectedBg) {
     let drew = false;
-    if (
-      selectedBg.type === "image" &&
-      bgImg.complete &&
-      bgImg.naturalWidth
-    ) {
+    if (selectedBg.type === "image" && bgImg.complete && bgImg.naturalWidth) {
       drew = drawMediaCover(pctx, bgImg, W, H);
     } else if (selectedBg.type === "video" && bgVideo.readyState >= 2) {
       drew = drawMediaCover(pctx, bgVideo, W, H);
@@ -647,10 +640,7 @@ function drawPreview() {
   pctx.restore();
 
   // Bottom label
-  pctx.font = `600 ${Math.max(
-    30,
-    Math.round(36 * scale)
-  )}px ${selectedFont}`;
+  pctx.font = `600 ${Math.max(30, Math.round(36 * scale))}px ${selectedFont}`;
   pctx.fillStyle = fontColor;
   pctx.textAlign = "right";
   pctx.fillText(currentLabel, W - 40, H - 60);
@@ -665,7 +655,7 @@ function drawPreview() {
 
   if (showCreditCreator) {
     const txt = "Quran Shorts — Editor by TheAAA";
-    pctx.font = `600 18px ${selectedFont}`;
+    pctx.font = `600 28px ${selectedFont}`;
     const tw = pctx.measureText(txt).width;
     const th = 24;
     const bx = 40,
@@ -690,7 +680,7 @@ function drawPreview() {
   const madeByNameNow = (madeByInput?.value || "").trim();
   const showMadeByNow = !!creditMadeByChk?.checked;
   if (showMadeByNow && madeByNameNow) {
-    pctx.font = `600 18px ${selectedFont}`;
+    pctx.font = `600 28px ${selectedFont}`;
     let txt = `Made by ${madeByNameNow}`;
     const th = 24;
     const bx = W - 40,
@@ -720,7 +710,7 @@ function drawPreview() {
 
   if (showCreditData) {
     let txt = "Data: Quran.com & AlQuran Cloud • Audio: EveryAyah.com";
-    pctx.font = `600 18px ${selectedFont}`;
+    pctx.font = `600 28px ${selectedFont}`;
     const th = 24;
     const bx = 40,
       by = H - 60;
@@ -734,7 +724,7 @@ function drawPreview() {
     drawRoundedRect(
       pctx,
       bx - badgePadX,
-      by - th - badgePadY + 6,
+      by - th - badgePadY - 46,
       tw + badgePadX * 2,
       th + badgePadY * 2,
       badgeRadius
@@ -742,7 +732,7 @@ function drawPreview() {
     pctx.fill();
     pctx.restore();
     pctx.fillStyle = creditTextColor;
-    pctx.fillText(txt, bx, by);
+    pctx.fillText(txt, bx, by - 48);
   }
 
   requestAnimationFrame(drawPreview);
@@ -990,8 +980,7 @@ async function loadAndPlay({ record }) {
     sessionTo > s.ayahCount ||
     sessionFrom > sessionTo
   ) {
-    recStatus.textContent =
-      "Invalid ayah range. Please adjust the selection.";
+    recStatus.textContent = "Invalid ayah range. Please adjust the selection.";
     setDuringRecordingUI(false);
     return;
   }
@@ -1145,9 +1134,7 @@ downloadBtn.addEventListener("click", () => {
   const ts = timestampStr();
   const filename = `Surah-${sessionSurah}-${safe(
     sessionSurahName
-  )}_Ayah-${sessionFrom}-${sessionTo}_${safe(
-    sessionReciterName
-  )}_${ts}.webm`;
+  )}_Ayah-${sessionFrom}-${sessionTo}_${safe(sessionReciterName)}_${ts}.webm`;
   const url = URL.createObjectURL(finalBlob);
   const a = document.createElement("a");
   a.href = url;
