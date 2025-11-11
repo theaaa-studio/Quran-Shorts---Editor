@@ -494,7 +494,12 @@ audio {
   flex: 0 0 auto;
 }
 
-.background-panel .inline-row select,
+.background-panel .inline-row select {
+  width: 180px;
+  /* or any width you prefer */
+  min-width: 140px;
+}
+
 .background-panel .inline-row input[type="color"] {
   width: 48px;
 }
@@ -706,4 +711,10 @@ html[data-theme="light"] input[type="text"]:hover {
 /* ===================== Minor extras ===================== */
 #audioPlayer {
   display: none;
+}
+
+@media (max-width: 600px) {
+  .background-panel .inline-row select {
+    width: 100%;
+  }
 }
