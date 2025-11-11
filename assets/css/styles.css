@@ -718,3 +718,138 @@ html[data-theme="light"] input[type="text"]:hover {
     width: 100%;
   }
 }
+
+/* ===================== Better Mobile Layout (phones only) ===================== */
+@media (max-width: 900px) {
+
+  /* 1) Layout: stack panels, generous spacing */
+  .app {
+    grid-template-columns: 1fr;
+    /* stack sidebar then preview */
+  }
+
+  .sidebar {
+    position: relative;
+    height: auto;
+    padding: 14px;
+    gap: 14px;
+  }
+
+  .panel {
+    padding: 12px;
+    gap: 10px;
+  }
+
+  /* 2) Readability + tap targets */
+  body {
+    font-size: 16px;
+    /* base text a bit larger on phones */
+  }
+
+  label.small {
+    font-size: 13px;
+  }
+
+  .btn,
+  button {
+    min-height: 44px;
+    /* comfortable touch size */
+    font-size: 15px;
+  }
+
+  .toggle {
+    padding: 12px;
+    /* bigger toggle hit area */
+  }
+
+  /* 3) Form controls fill the width */
+  .three-col,
+  .four-col-inline,
+  .two-col-inline {
+    grid-template-columns: 1fr;
+    /* one per row on mobile */
+    gap: 10px;
+  }
+
+  select,
+  input[type="text"],
+  input[type="range"],
+  .file-trigger {
+    width: 100%;
+  }
+
+  /* 4) Background panel: keep options readable, no horizontal scroll */
+  .background-panel .inline-row {
+    flex-wrap: wrap;
+    overflow-x: visible;
+    gap: 10px;
+  }
+
+  .background-panel .inline-row .toggle,
+  .background-panel .inline-row .field {
+    flex: 1 1 100%;
+  }
+
+  /* Ensure the media chooser shows names properly on phones */
+  #bgMediaField select {
+    width: 100%;
+    min-width: 0;
+    /* allow shrinking */
+  }
+
+  #bgMediaField .file-trigger {
+    width: 100%;
+    justify-content: center;
+  }
+
+  #bgMediaHint {
+    width: 100%;
+  }
+
+  /* 5) Transport / preview controls: easy to reach */
+  .transport {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .transport .btn {
+    width: 100%;
+  }
+
+  .preview {
+    padding: 12px;
+    gap: 12px;
+  }
+
+  .preview-stage {
+    min-height: auto;
+  }
+
+  #previewCanvas {
+    width: min(100%, 420px);
+    /* a bit larger on modern phones */
+    height: auto;
+    border-radius: 18px;
+  }
+
+  .preview-buttons {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .preview-volume {
+    width: 100%;
+    gap: 8px;
+  }
+
+  #volumeSlider {
+    width: 100%;
+    max-width: 360px;
+  }
+
+  /* 6) Header tweak: keep theme button nicely placed */
+  .brand .theme-toggle {
+    width: 40px;
+    height: 40px;
+  }
+}
