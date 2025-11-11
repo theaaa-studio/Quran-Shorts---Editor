@@ -1065,20 +1065,40 @@ async function playIndex(i, autoplay = false) {
   const s3 = pad3(it.surah),
     a3 = pad3(it.ayah);
 
-  try {
-    const tRes = await fetchRetry(
-      `https://api.alquran.cloud/v1/ayah/${it.surah}:${it.ayah}/${translationEdition}`
-    );
-    const t = await tRes.json();
-    currentText =
-      t && t.code === 200 && t.data && t.data.text
-        ? t.data.text
-        : "(Translation unavailable)";
-  } catch {
-    currentText = "(Failed to load translation)";
+  // --- Translation fetch with fallback ---
+  async function fetchAyahText(editionId) {
+    try {
+      const tRes = await fetchRetry(
+        `https://api.alquran.cloud/v1/ayah/${it.surah}:${it.ayah}/${editionId}`
+      );
+      const t = await tRes.json();
+      if (t && t.code === 200 && t.data && t.data.text) {
+        return { ok: true, text: t.data.text };
+      }
+      return { ok: false, text: "" };
+    } catch {
+      return { ok: false, text: "" };
+    }
   }
 
+  const chosenEdition = (
+    translationEditionSel?.value ||
+    translationEdition ||
+    "en.asad"
+  ).trim();
+  let tResult = await fetchAyahText(chosenEdition);
+
+  // Fallback to en.asad if the chosen edition fails
+  if (!tResult.ok && chosenEdition !== "en.asad") {
+    console.warn(`Edition "${chosenEdition}" failed; falling back to en.asad`);
+    tResult = await fetchAyahText("en.asad");
+  }
+
+  currentText = tResult.ok ? tResult.text : "(Translation unavailable)";
+
   currentLabel = `${it.sName} • Ayah ${it.ayah}`;
+
+  // --- Audio setup (unchanged) ---
   const reciter = reciterSel.value;
   const audioUrl = `https://everyayah.com/data/${reciter}/${s3}${a3}.mp3`;
 
@@ -1171,15 +1191,224 @@ volumeSlider?.addEventListener("input", async () => {
   // routing unchanged, element remains audible
 });
 
+// ===================================================================
+// ===================== RECITERS + DEDUP LOGIC ======================
+// ===================================================================
+
+// Complete list (can be extended later)
+const RECITERS = [
+  "AbdulSamad_64kbps_QuranExplorer.Com",
+  "Abdul_Basit_Mujawwad_128kbps",
+  "Abdul_Basit_Murattal_192kbps",
+  "Abdul_Basit_Murattal_64kbps",
+  "Abdullaah_3awwaad_Al-Juhaynee_128kbps",
+  "Abdullah_Basfar_192kbps",
+  "Abdullah_Basfar_32kbps",
+  "Abdullah_Basfar_64kbps",
+  "Abdullah_Matroud_128kbps",
+  "Abdurrahmaan_As-Sudais_192kbps",
+  "Abdurrahmaan_As-Sudais_64kbps",
+  "Abu Bakr Ash-Shaatree_128kbps",
+  "Abu_Bakr_Ash-Shaatree_128kbps",
+  "Abu_Bakr_Ash-Shaatree_64kbps",
+  "Ahmed_Neana_128kbps",
+  "Ahmed_ibn_Ali_al-Ajamy_128kbps_ketaballah.net",
+  "Ahmed_ibn_Ali_al-Ajamy_64kbps_QuranExplorer.Com",
+  "Akram_AlAlaqimy_128kbps",
+  "Alafasy_128kbps",
+  "Alafasy_64kbps",
+  "Ali_Hajjaj_AlSuesy_128kbps",
+  "Ali_Jaber_64kbps",
+  "Ayman_Sowaid_64kbps",
+  "Fares_Abbad_64kbps",
+  "Ghamadi_40kbps",
+  "Hani_Rifai_192kbps",
+  "Hani_Rifai_64kbps",
+  "Hudhaify_128kbps",
+  "Hudhaify_32kbps",
+  "Hudhaify_64kbps",
+  "Husary_128kbps",
+  "Husary_128kbps_Mujawwad",
+  "Husary_64kbps",
+  "Husary_Muallim_128kbps",
+  "Husary_Mujawwad_64kbps",
+  "Ibrahim_Akhdar_32kbps",
+  "Ibrahim_Akhdar_64kbps",
+  "Karim_Mansoori_40kbps",
+  "Khaalid_Abdullaah_al-Qahtaanee_192kbps",
+  "MaherAlMuaiqly128kbps",
+  "Maher_AlMuaiqly_64kbps",
+  "Menshawi_16kbps",
+  "Menshawi_32kbps",
+  "Minshawy_Mujawwad_192kbps",
+  "Minshawy_Mujawwad_64kbps",
+  "Minshawy_Murattal_128kbps",
+  "Minshawy_Teacher_128kbps",
+  "Mohammad_al_Tablaway_128kbps",
+  "Mohammad_al_Tablaway_64kbps",
+  "Muhammad_AbdulKareem_128kbps",
+  "Muhammad_Ayyoub_128kbps",
+  "Muhammad_Ayyoub_32kbps",
+  "Muhammad_Ayyoub_64kbps",
+  "Muhammad_Jibreel_128kbps",
+  "Muhammad_Jibreel_64kbps",
+  "Muhsin_Al_Qasim_192kbps",
+  "Mustafa_Ismail_48kbps",
+  "Nabil_Rifa3i_48kbps",
+  "Nasser_Alqatami_128kbps",
+  "Parhizgar_48kbps",
+  "Sahl_Yassin_128kbps",
+  "Salaah_AbdulRahman_Bukhatir_128kbps",
+  "Salah_Al_Budair_128kbps",
+  "Saood bin Ibraaheem Ash-Shuraym_128kbps",
+  "Saood_ash-Shuraym_128kbps",
+  "Saood_ash-Shuraym_64kbps",
+  "Yaser_Salamah_128kbps",
+  "Yasser_Ad-Dussary_128kbps",
+  "ahmed_ibn_ali_al_ajamy_128kbps",
+  "aziz_alili_128kbps",
+  "khalefa_al_tunaiji_64kbps",
+  "mahmoud_ali_al_banna_32kbps",
+];
+
+// ---------- Reciter helpers: bitrate + normalization (FULL) ----------
+function parseBitrate(reciterId) {
+  // Finds "...128kbps" even without underscores (e.g., "MaherAlMuaiqly128kbps")
+  const m = String(reciterId)
+    .toLowerCase()
+    .match(/(\d+)\s*kbps/);
+  return m ? Number(m[1]) : 0;
+}
+
+function stripHostSuffix(str) {
+  // Remove known host/source suffixes that don't define identity
+  return String(str)
+    .replace(/_?QuranExplorer\.Com$/i, "")
+    .replace(/_?ketaballah\.net$/i, "");
+}
+
+function canonicalBase(reciterId) {
+  // 1) Remove host/source suffixes
+  let base = stripHostSuffix(reciterId);
+
+  // 2) Remove the bitrate token (`_128kbps`, `64kbps`, etc.) while keeping style words
+  base = base.replace(/_?\d+\s*kbps/gi, "");
+
+  // 3) Normalize underscores/spaces; trim any trailing separators
+  base = base
+    .replace(/\s+/g, " ")
+    .replace(/_+/g, "_")
+    .replace(/_+$/g, "")
+    .trim();
+
+  // Lower-case for grouping key (labeling handled separately)
+  return base.toLowerCase();
+}
+
+function humanizeReciterId(reciterId) {
+  // Make a readable label; drop hosts; keep style words (Mujawwad, Murattal, Teacher, etc.)
+  let label = stripHostSuffix(reciterId);
+
+  // Remove bitrate token from label text for a cleaner display
+  label = label.replace(/_?\d+\s*kbps/gi, "");
+
+  // Beautify
+  label = label.replace(/_/g, " ").replace(/\s+/g, " ").trim();
+
+  // Basic capitalization fixes for common tokens
+  label = label
+    .replace(/\bkbps\b/gi, "kbps")
+    .replace(/\bMurattal\b/gi, "Murattal")
+    .replace(/\bMujawwad\b/gi, "Mujawwad")
+    .replace(/\bTeacher\b/gi, "Teacher");
+
+  return label;
+}
+
+function pickHighestBitrateReciters(reciters) {
+  // Group by canonical base (same name/style), keep highest bitrate
+  const byBase = new Map();
+
+  for (const rid of reciters) {
+    const base = canonicalBase(rid);
+    const br = parseBitrate(rid);
+
+    const prev = byBase.get(base);
+    if (!prev) {
+      byBase.set(base, { id: rid, bitrate: br });
+      continue;
+    }
+
+    // Prefer the entry with higher bitrate; if tie, prefer the one without host suffix
+    if (br > prev.bitrate) {
+      byBase.set(base, { id: rid, bitrate: br });
+    } else if (br === prev.bitrate) {
+      const prevHasHost = /_?(QuranExplorer\.Com|ketaballah\.net)$/i.test(
+        prev.id
+      );
+      const curHasHost = /_?(QuranExplorer\.Com|ketaballah\.net)$/i.test(rid);
+      if (prevHasHost && !curHasHost) {
+        byBase.set(base, { id: rid, bitrate: br });
+      }
+    }
+  }
+
+  // Return the winning reciter IDs, sorted by readable label
+  const winners = Array.from(byBase.values()).map((v) => v.id);
+  winners.sort((a, b) =>
+    humanizeReciterId(a).localeCompare(humanizeReciterId(b))
+  );
+  return winners;
+}
+
+// ---------- Reciter loader (FULL) ----------
+function loadReciters() {
+  if (!reciterSel) return;
+
+  // Deduplicate by highest bitrate per reciter/style
+  const DEDUPED = pickHighestBitrateReciters(RECITERS);
+
+  const html = DEDUPED.map((rid) => {
+    const label = humanizeReciterId(rid);
+    return `<option value="${rid}">${label}</option>`;
+  }).join("");
+
+  reciterSel.innerHTML = html;
+
+  // Choose a sensible default (try these in order)
+  const preferredOrder = [
+    "Alafasy_128kbps",
+    "Abdurrahmaan_As-Sudais_192kbps",
+    "Maher_AlMuaiqly_64kbps",
+    "MaherAlMuaiqly128kbps",
+  ];
+  const preferred = preferredOrder.find((p) => DEDUPED.includes(p));
+
+  reciterSel.value = preferred || DEDUPED[0];
+
+  // Keep session reciter name aligned for filenames, etc.
+  const opt = reciterSel.options[reciterSel.selectedIndex];
+  sessionReciterName = opt ? opt.text : humanizeReciterId(reciterSel.value);
+}
+
 // ------------------ Init ------------------
 (async () => {
   await loadMeta();
+  loadReciters(); // populate reciter list with highest-bitrate dedup
+
+  // NEW: populate all translation editions
+  await loadTranslations();
+
   selectedFont = fontPicker.value;
   sizePercent = parseInt(textSize.value, 10) || 100;
   if (textSizeVal) textSizeVal.textContent = `(${sizePercent}%)`;
   bgColor = bgColorInput.value;
   fontColor = fontColorInput.value;
-  translationEdition = translationEditionSel?.value || "en.asad";
+
+  // Keep state aligned with the <select>
+  translationEdition =
+    translationEditionSel?.value || translationEdition || "en.asad";
+
   showCreditData = !!creditDataChk?.checked;
   showCreditCreator = !!creditCreatorChk?.checked;
   applyBgModeUI();
@@ -1189,7 +1418,109 @@ volumeSlider?.addEventListener("input", async () => {
   // Volume UI defaults
   if (volumeVal) volumeVal.textContent = `${volumeSlider?.value || 100}%`;
   audio.volume = (Number(volumeSlider?.value) || 100) / 100;
-  // audio.muted = false; // ensure always audible
 
   requestAnimationFrame(drawPreview);
 })();
+
+// ------------------ Translations (populate all editions) ------------------
+async function loadTranslations() {
+  // If there's no <select id="translationEdition">, nothing to do
+  if (!translationEditionSel) return;
+
+  // Temporary UI
+  translationEditionSel.disabled = true;
+  translationEditionSel.innerHTML = `<option value="">Loading translations…</option>`;
+
+  try {
+    // Pull ALL text translations from AlQuran Cloud
+    // Docs: https://api.alquran.cloud/v1/edition?format=text&type=translation
+    const res = await fetchRetry(
+      "https://api.alquran.cloud/v1/edition?format=text&type=translation"
+    );
+    const json = await res.json();
+
+    // The API sometimes returns `data` directly, sometimes nested as `data.editions`
+    const raw = Array.isArray(json?.data)
+      ? json.data
+      : Array.isArray(json?.data?.editions)
+      ? json.data.editions
+      : [];
+
+    // Normalize and sort (by language code, then translator/name)
+    const editions = raw
+      .map((e) => {
+        const id = String(e?.identifier || "").trim(); // e.g., "en.asad"
+        const lang = String(e?.language || "").trim(); // e.g., "en"
+        // Prefer englishName, fall back to name
+        const display = String(e?.englishName || e?.name || "").trim();
+        // Build a clean, informative label
+        // Example:  "EN — Asad (en.asad)"
+        const label = `${lang.toUpperCase()} — ${display || id} (${id})`;
+        return id ? { id, lang, label } : null;
+      })
+      .filter(Boolean)
+      .sort((a, b) =>
+        a.lang === b.lang
+          ? a.label.localeCompare(b.label)
+          : a.lang.localeCompare(b.lang)
+      );
+
+    if (!editions.length) {
+      throw new Error("No translation editions found.");
+    }
+
+    // Fill the <select>
+    translationEditionSel.innerHTML = editions
+      .map((ed) => `<option value="${ed.id}">${ed.label}</option>`)
+      .join("");
+
+    // Choose a sensible default:
+    // 1) Keep previously selected (if still present)
+    // 2) Prefer a known English edition (asad, sahih, muhsin, maududi)
+    // 3) Otherwise first item
+    const current = (
+      translationEditionSel.value ||
+      translationEdition ||
+      ""
+    ).trim();
+
+    const prefer = [
+      "en.asad",
+      "en.sahih",
+      "en.muhammadtaqiuddinkhan",
+      "en.pickthall",
+      "en.yusufali",
+      "en.maududi",
+      "en.mubarakpuri",
+    ];
+    let toSelect = "";
+
+    if (current && editions.some((e) => e.id === current)) {
+      toSelect = current;
+    } else {
+      toSelect =
+        prefer.find((p) => editions.some((e) => e.id === p)) ||
+        editions.find((e) => e.lang === "en")?.id ||
+        editions[0].id;
+    }
+
+    translationEditionSel.value = toSelect;
+    translationEdition = toSelect; // keep the state in sync
+  } catch (err) {
+    console.warn("Failed to load translations:", err);
+
+    // Hard fallback to a minimal set so app keeps working
+    const fallback = [
+      { id: "en.asad", label: "EN — Asad (en.asad)" },
+      { id: "en.sahih", label: "EN — Saheeh International (en.sahih)" },
+      { id: "en.yusufali", label: "EN — Yusuf Ali (en.yusufali)" },
+    ];
+    translationEditionSel.innerHTML = fallback
+      .map((f) => `<option value="${f.id}">${f.label}</option>`)
+      .join("");
+    translationEditionSel.value = "en.asad";
+    translationEdition = "en.asad";
+  } finally {
+    translationEditionSel.disabled = false;
+  }
+}
