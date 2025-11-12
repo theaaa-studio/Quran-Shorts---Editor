@@ -1,0 +1,24 @@
+        <!-- Panel: Playback & Export -->
+        <div class="panel">
+          <h3>Playback & Export</h3>
+          <div class="transport">
+            <button id="buildPreviewBtn" class="btn ghost">
+              Play & Export
+            </button>
+            <!-- ✅ ADD: Dismiss button -->
+            <button id="dismissBtn" class="btn ghost" disabled>Dismiss</button>
+            <button id="downloadBtn" class="btn ghost" disabled>
+              Download (WebM)
+            </button>
+          </div>
+
+          <div class="two-col-inline">
+            <!-- <div class="status" id="status">Ready.</div> -->
+            <div class="status" id="recStatus">
+              Press Play & Export to preview & auto-record. Avoid the right
+              audio controller during recording.
+            </div>
+          </div>
+          <div class="meter"><span id="meterBar"></span></div>
+        </div>
+

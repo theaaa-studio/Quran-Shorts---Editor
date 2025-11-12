@@ -1,0 +1,32 @@
+/* ==========================================================================
+   Layout (App Grid, Sidebar, Preview)
+   ========================================================================== */
+
+.app {
+  height: 100%;
+  display: grid;
+  grid-template-columns: var(--sidebar) var(--preview);
+}
+
+/* Sidebar (left 70%) */
+.sidebar {
+  border-right: 1px solid var(--line);
+  padding: 18px;
+  display: grid;
+  grid-template-rows: auto auto auto auto auto auto 1fr;
+  /* brand, input, background, typography, credits, playback, spacer */
+  gap: 16px;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  background: linear-gradient(180deg, var(--panel), var(--panel-2));
+}
+
+/* Preview (right 30%) */
+.preview {
+  padding: 24px;
+  display: grid;
+  grid-template-rows: 1fr auto;
+  gap: 16px;
+}
+

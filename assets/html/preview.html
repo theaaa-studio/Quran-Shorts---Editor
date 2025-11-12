@@ -1,0 +1,52 @@
+      <!-- RIGHT: Preview (30%) -->
+      <main class="preview">
+        <div class="preview-stage">
+          <canvas
+            id="previewCanvas"
+            width="1080"
+            height="1920"
+            aria-label="Shorts Preview"
+          ></canvas>
+        </div>
+
+        <div class="preview-controls">
+          <div class="preview-buttons">
+            <button id="previewPlayBtn" class="btn ghost">Load & Play</button>
+            <button id="previewStopBtn" class="btn ghost">Stop</button>
+          </div>
+
+          <!-- ✅ ADD: Volume control row -->
+          <div class="preview-volume">
+            <label for="volumeSlider" class="small" style="color: var(--muted)"
+              >Volume</label
+            >
+            <input
+              id="volumeSlider"
+              type="range"
+              min="0"
+              max="100"
+              value="100"
+            />
+            <span id="volumeVal" class="small" style="color: var(--muted)"
+              >100%</span
+            >
+          </div>
+
+          <div id="audioErrorMessage" class="audio-error-message"></div>
+        </div>
+
+        <audio
+          id="audioPlayer"
+          controls
+          preload="metadata"
+          style="display: none"
+        ></audio>
+        <a
+          href="https://theaaa-studio.github.io/AAA_Personal_Portfolio/"
+          target="_blank"
+          class="version-info"
+        >
+          Version 1.0 • <span class="dev-name">Developed by TheAAA</span> • 2025
+        </a>
+      </main>
+

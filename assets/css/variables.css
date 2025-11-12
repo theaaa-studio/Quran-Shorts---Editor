@@ -1,0 +1,30 @@
+/* ==========================================================================
+   CSS Variables (Root)
+   ========================================================================== */
+
+:root {
+  --bg: #0b0d12;
+  --panel: #0f131a;
+  --panel-2: #0c1117;
+  --text: #e8eef9;
+  --muted: #9fb0cc;
+  --line: rgba(255, 255, 255, 0.08);
+  --accent-1: #7c5cff;
+  --accent-2: #22d3ee;
+  --radius: 16px;
+  --gap: 14px;
+
+  /* Layout split */
+  --sidebar: 70%;
+  --preview: 30%;
+
+  /* Preview size */
+  --previewMax: 360px;
+  --previewMaxMobile: 210px;
+
+  /* Hover & focus tokens */
+  --hover-ring: rgba(124, 92, 255, 0.35);
+  --hover-border: rgba(124, 92, 255, 0.55);
+  --hover-shadow-btn: 0 8px 22px rgba(124, 92, 255, 0.22);
+}
+

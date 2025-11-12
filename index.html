@@ -40,6 +40,8 @@
     <div class="app">
       <!-- LEFT: Sidebar (70%) -->
       <aside class="sidebar">
+        <!-- SECTION: Brand/Header -->
+        <!-- Source: assets/html/brand.html -->
         <div class="brand">
           <div class="logo"></div>
           <div>
@@ -57,7 +59,8 @@
           </button>
         </div>
 
-        <!-- Panel: Input -->
+        <!-- SECTION: Input Panel -->
+        <!-- Source: assets/html/input-panel.html -->
         <div class="panel">
           <h3>Choose</h3>
           <div class="three-col">
@@ -123,7 +126,8 @@
           </div>
         </div>
 
-        <!-- Panel: Background -->
+        <!-- SECTION: Background Panel -->
+        <!-- Source: assets/html/background-panel.html -->
         <div class="panel background-panel">
           <h3>Background</h3>
           <div class="inline-row">
@@ -203,7 +207,8 @@
           </div>
         </div>
 
-        <!-- Panel: Typography -->
+        <!-- SECTION: Typography Panel -->
+        <!-- Source: assets/html/typography-panel.html -->
         <div class="panel">
           <h3>Typography</h3>
           <div class="four-col-inline">
@@ -295,7 +300,8 @@
           </div>
         </div>
 
-        <!-- Panel: Credits -->
+        <!-- SECTION: Credits Panel -->
+        <!-- Source: assets/html/credits-panel.html -->
         <div class="panel">
           <h3>Credits</h3>
           <div class="four-col-inline">
@@ -326,7 +332,8 @@
           </div>
         </div>
 
-        <!-- Panel: Playback & Export -->
+        <!-- SECTION: Playback & Export Panel -->
+        <!-- Source: assets/html/playback-panel.html -->
         <div class="panel">
           <h3>Playback & Export</h3>
           <div class="transport">
@@ -351,7 +358,8 @@
         </div>
       </aside>
 
-      <!-- RIGHT: Preview (30%) -->
+      <!-- SECTION: Preview Section -->
+      <!-- Source: assets/html/preview.html -->
       <main class="preview">
         <div class="preview-stage">
           <canvas
@@ -387,44 +395,6 @@
 
           <div id="audioErrorMessage" class="audio-error-message"></div>
         </div>
-        <style>
-          .preview-buttons {
-            display: flex;
-            gap: 12px;
-            justify-content: center;
-            width: 100%;
-          }
-          .preview-controls {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 8px;
-            width: 100%;
-          }
-          .preview-volume {
-            /* ✅ ADD */
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            justify-content: center;
-            width: 100%;
-          }
-          #volumeSlider {
-            /* ✅ ADD */
-            width: 220px;
-          }
-          .audio-error-message {
-            color: #856404;
-            font-size: 14px;
-            display: none;
-            text-align: center;
-            max-width: 80%;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            margin: 0 auto;
-          }
-        </style>
 
         <audio
           id="audioPlayer"
@@ -439,19 +409,6 @@
         >
           Version 1.0 • <span class="dev-name">Developed by TheAAA</span> • 2025
         </a>
-
-        <style>
-          .version-info {
-            text-decoration: none;
-            color: inherit;
-          }
-          .version-info .dev-name {
-            text-decoration: underline;
-          }
-          #audioPlayer {
-            display: none;
-          }
-        </style>
       </main>
     </div>
   </body>

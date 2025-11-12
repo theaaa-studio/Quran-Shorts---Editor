@@ -1,0 +1,192 @@
+/* ==========================================================================
+   Form Controls (Inputs, Selects, Buttons)
+   ========================================================================== */
+
+/* Form base */
+select,
+button,
+input[type="range"],
+input[type="color"],
+input[type="text"] {
+  appearance: none;
+  padding: 10px 12px;
+  font-size: 14px;
+  color: var(--text);
+  background: #0c1117;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  outline: none;
+  width: 100%;
+  transition: border-color 0.12s ease, box-shadow 0.12s ease,
+    transform 0.12s ease;
+}
+
+input[type="color"] {
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  cursor: pointer;
+}
+
+input[type="color"]::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+
+input[type="color"]::-webkit-color-swatch {
+  border: none;
+  border-radius: 8px;
+}
+
+input[type="color"]::-moz-color-swatch {
+  border: none;
+  border-radius: 8px;
+}
+
+input[type="range"] {
+  height: 38px;
+  padding: 0 2px;
+  background: transparent;
+}
+
+input[type="range"]::-webkit-slider-runnable-track {
+  height: 6px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--accent-1), var(--accent-2));
+  opacity: 0.6;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid #cbd5e1;
+  margin-top: -6px;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.4);
+}
+
+input[type="range"]::-moz-range-track {
+  height: 6px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--accent-1), var(--accent-2));
+  opacity: 0.6;
+}
+
+input[type="range"]::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid #cbd5e1;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.4);
+}
+
+/* Buttons */
+.btn {
+  cursor: pointer;
+  user-select: none;
+  background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+  color: #071018;
+  border: none;
+  font-weight: 700;
+  padding: 10px 12px;
+  border-radius: 10px;
+  transition: transform 0.12s ease, box-shadow 0.12s ease,
+    border-color 0.12s ease;
+}
+
+.btn.ghost {
+  background: #0c1117;
+  color: var(--text);
+  border: 1px solid var(--line);
+  box-shadow: none;
+  /* hover adds shadow for buttons only */
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* ===================== Interactables (affordances) ===================== */
+
+/* Pointers for interactables (text inputs keep I-beam) */
+button,
+.btn,
+.file-trigger,
+.toggle,
+.brand .theme-toggle,
+.preview-buttons button,
+.transport button,
+select,
+input[type="checkbox"],
+input[type="radio"],
+input[type="range"],
+input[type="color"],
+label[for] {
+  cursor: pointer;
+}
+
+input[type="text"] {
+  cursor: text;
+}
+
+/* NON-BUTTON hover (border-only) */
+.file-trigger:hover,
+.toggle:hover,
+select:hover,
+input[type="color"]:hover,
+input[type="range"]:hover,
+input[type="text"]:hover {
+  border-color: var(--hover-border);
+  box-shadow: 0 0 0 3px rgba(124, 92, 255, 0.12);
+  /* ring, not a drop shadow */
+  transform: none;
+}
+
+/* Inputs/text focus (ring, not shadow) */
+input[type="text"]:focus {
+  border-color: var(--hover-border);
+  box-shadow: 0 0 0 3px rgba(124, 92, 255, 0.12);
+}
+
+/* Buttons — hover/active: shadow + blue border ring */
+.btn {
+  border: 1px solid transparent;
+}
+
+/* allow showing border color on solid buttons */
+button:hover:not(:disabled),
+.btn:hover:not(:disabled) {
+  border-color: var(--hover-border);
+  box-shadow: var(--hover-shadow-btn), 0 0 0 3px rgba(124, 92, 255, 0.12);
+  transform: translateY(-1px);
+}
+
+button:active:not(:disabled),
+.btn:active:not(:disabled) {
+  transform: translateY(1px);
+  box-shadow: 0 4px 14px rgba(124, 92, 255, 0.18);
+}
+
+/* Universal keyboard focus ring (all controls) */
+button:focus-visible,
+.btn:focus-visible,
+.file-trigger:focus-visible,
+.toggle:focus-visible,
+.brand .theme-toggle:focus-visible,
+select:focus-visible,
+input[type="text"]:focus-visible,
+input[type="color"]:focus-visible,
+input[type="range"]:focus-visible,
+input[type="checkbox"]:focus-visible,
+input[type="radio"]:focus-visible,
+label[for]:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 4px var(--hover-ring);
+  border-color: var(--hover-border);
+}
+
