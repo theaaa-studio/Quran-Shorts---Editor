@@ -22,6 +22,7 @@ function inferTypeFromPath(src) {
 }
 
 let userUploads = []; // [{ src, type, name, __blobUrl: true }]
+let baseMediaList = []; // items from JSON or defaults
 
 function revokeUserUploadURLs() {
   for (const item of userUploads) {
@@ -52,11 +53,19 @@ bgVideo.crossOrigin = "anonymous";
 function populateSelectFromList(list) {
   const bgMediaSelect = $("#bgMediaSelect");
   const bgMediaHint = $("#bgMediaHint");
-  if (!bgMediaSelect || !bgMediaHint) return;
+  if (!bgMediaSelect || !bgMediaHint) {
+    console.warn("populateSelectFromList: Elements not found", { bgMediaSelect: !!bgMediaSelect, bgMediaHint: !!bgMediaHint });
+    return;
+  }
+
+  // If list is provided, update baseMediaList (unless it's a re-render)
+  if (list) {
+    baseMediaList = list;
+  }
 
   const combined = [
     ...userUploads,
-    ...(list || []).filter(
+    ...(baseMediaList || []).filter(
       (it) => it.src && (it.type === "image" || it.type === "video")
     ),
   ];
@@ -142,9 +151,41 @@ async function loadBackgroundAssets() {
   }
 }
 
+function handleUserUploads(fileList) {
+  console.log("handleUserUploads called with", fileList.length, "files");
+  if (!fileList || !fileList.length) return;
+
+  // Revoke old URLs
+  revokeUserUploadURLs();
+  userUploads = [];
+
+  // Create new uploads
+  for (const f of fileList) {
+    const url = URL.createObjectURL(f);
+    const isVideo = (f.type || "").startsWith("video");
+    const isImage = (f.type || "").startsWith("image");
+    console.log("Processing file:", f.name, "type:", f.type, "isVideo:", isVideo, "isImage:", isImage);
+    if (!isVideo && !isImage) continue;
+
+    userUploads.push({
+      src: url,
+      type: isVideo ? "video" : "image",
+      name: `📥 ${f.name}`,
+      __blobUrl: true,
+    });
+  }
+  console.log("User uploads processed. Total:", userUploads.length);
+
+  // Re-populate select using existing baseMediaList
+  populateSelectFromList(null); // passing null to use existing baseMediaList
+}
+
 function onBgMediaChange() {
-  const bgMediaSelect = $("#bgMediaSelect");
-  if (!bgMediaSelect) return;
+  const bgMediaSelect = document.getElementById("bgMediaSelect"); // Use direct DOM access
+  if (!bgMediaSelect) {
+    console.warn("onBgMediaChange: bgMediaSelect not found");
+    return;
+  }
   const idx = parseInt(bgMediaSelect.value, 10);
   selectedBg = bgMediaList[idx] || null;
 
@@ -236,4 +277,5 @@ window.backgroundModule = {
   applyBgModeUI,
   populateSelectFromList,
   onBgMediaChange,
+  handleUserUploads,
 };

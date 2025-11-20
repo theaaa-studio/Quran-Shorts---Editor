@@ -26,6 +26,7 @@ let volumeSlider, volumeVal;
 let audio, recStatus, meterBar;
 
 function initializeDOM() {
+  console.log("initializeDOM called");
   reciterSel = $("#reciter");
   surahSel = $("#surah");
   ayahStartSel = $("#ayahStart");
@@ -55,6 +56,12 @@ function initializeDOM() {
   bgMediaSelect = $("#bgMediaSelect");
   bgMediaHint = $("#bgMediaHint");
   bgUploadInput = $("#bgUploadInput");
+  
+  console.log("DOM Elements found:", {
+    bgModeMedia: !!bgModeMedia,
+    bgMediaSelect: !!bgMediaSelect,
+    bgUploadInput: !!bgUploadInput
+  });
 
   previewCanvas = $("#previewCanvas");
   if (!previewCanvas) {
@@ -484,9 +491,31 @@ function setupEventListeners() {
     });
   }
 
-  // Wire up background file upload
-  bgUploadInput?.addEventListener("change", (e) => {
-    handleUserFiles(e.target.files);
+  // Wire up background file upload using delegation
+  document.addEventListener("change", (e) => {
+    if (e.target && e.target.id === "bgUploadInput") {
+      console.log("Delegated change event on bgUploadInput", e.target.files);
+      if (e.target.files && e.target.files.length) {
+        window.backgroundModule.handleUserUploads(e.target.files);
+        
+        const bgModeMedia = document.getElementById("bgModeMedia");
+        const bgMediaSelect = document.getElementById("bgMediaSelect");
+        
+        // Switch to media mode if not already
+        if (bgModeMedia && !bgModeMedia.checked) {
+          bgModeMedia.checked = true;
+          window.backgroundModule.setBackgroundMode("media");
+          window.backgroundModule.applyBgModeUI();
+        }
+        
+        // Select the first item (which is the user upload)
+        if (bgMediaSelect) {
+          console.log("Setting bgMediaSelect value to 0");
+          bgMediaSelect.value = "0";
+          window.backgroundModule.onBgMediaChange();
+        }
+      }
+    }
   });
 
   // Wire up surah change to update ayah range
@@ -609,51 +638,7 @@ function setupEventListeners() {
   }
 }
 
-function handleUserFiles(fileList) {
-  if (!fileList || !fileList.length) return;
 
-  // Revoke old URLs
-  const userUploads = window.backgroundModule.userUploads || [];
-  for (const item of userUploads) {
-    if (item.__blobUrl && item.src) {
-      try {
-        URL.revokeObjectURL(item.src);
-      } catch {}
-    }
-  }
-  window.backgroundModule.userUploads = [];
-
-  // Create new uploads
-  for (const f of fileList) {
-    const url = URL.createObjectURL(f);
-    const isVideo = (f.type || "").startsWith("video");
-    const isImage = (f.type || "").startsWith("image");
-    if (!isVideo && !isImage) continue;
-
-    window.backgroundModule.userUploads.push({
-      src: url,
-      type: isVideo ? "video" : "image",
-      name: `📥 ${f.name}`,
-      __blobUrl: true,
-    });
-  }
-
-  // Update the select with new uploads
-  window.backgroundModule.populateSelectFromList(
-    window.backgroundModule.bgMediaList
-  );
-  if (bgModeMedia && !bgModeMedia.checked) {
-    bgModeMedia.checked = true;
-    window.backgroundModule.setBackgroundMode("media");
-    window.backgroundModule.applyBgModeUI();
-  }
-
-  if (window.backgroundModule.userUploads.length) {
-    const firstUploadIndex = 0;
-    bgMediaSelect.value = String(firstUploadIndex);
-    window.backgroundModule.onBgMediaChange();
-  }
-}
 
 // Note: populateSelectFromList is already exposed by background.js module
 
