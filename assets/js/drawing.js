@@ -286,7 +286,7 @@ function drawPreview() {
     const txt = "Quran Shorts — Editor by TheAAA";
     pctx.font = `600 28px ${selectedFont}`;
     const tw = pctx.measureText(txt).width;
-    const th = 24;
+    const th = 30;
     const bx = 40,
       by = 60;
     pctx.save();
@@ -311,7 +311,7 @@ function drawPreview() {
   if (showMadeByNow && madeByNameNow) {
     pctx.font = `600 28px ${selectedFont}`;
     let txt = `Made by ${madeByNameNow}`;
-    const th = 24;
+    const th = 30;
     const bx = W - 40,
       by = 60;
     while (pctx.measureText(txt).width > W - 120 && txt.length > 4) {
@@ -340,7 +340,7 @@ function drawPreview() {
   if (showCreditData) {
     let txt = "Data: Quran.com & AlQuran Cloud • Audio: EveryAyah.com";
     pctx.font = `600 28px ${selectedFont}`;
-    const th = 24;
+    const th = 30;
     const bx = 40,
       by = H - 60;
     while (pctx.measureText(txt).width > W - 120 && txt.length > 4) {
