@@ -153,7 +153,7 @@ input[type="color"]:hover,
 input[type="range"]:hover,
 input[type="text"]:hover {
   border-color: var(--hover-border);
-  box-shadow: 0 0 0 3px rgba(124, 92, 255, 0.12);
+  box-shadow: 0 0 0 3px rgba(0, 108, 53, 0.12);
   /* ring, not a drop shadow */
   transform: none;
 }
@@ -161,7 +161,7 @@ input[type="text"]:hover {
 /* Inputs/text focus (ring, not shadow) */
 input[type="text"]:focus {
   border-color: var(--hover-border);
-  box-shadow: 0 0 0 3px rgba(124, 92, 255, 0.12);
+  box-shadow: 0 0 0 3px rgba(0, 108, 53, 0.12);
 }
 
 /* Buttons — hover/active: shadow + blue border ring */
@@ -173,14 +173,14 @@ input[type="text"]:focus {
 button:hover:not(:disabled),
 .btn:hover:not(:disabled) {
   border-color: var(--hover-border);
-  box-shadow: var(--hover-shadow-btn), 0 0 0 3px rgba(124, 92, 255, 0.12);
+  box-shadow: var(--hover-shadow-btn), 0 0 0 3px rgba(0, 108, 53, 0.12);
   transform: translateY(-1px);
 }
 
 button:active:not(:disabled),
 .btn:active:not(:disabled) {
   transform: translateY(1px);
-  box-shadow: 0 4px 14px rgba(124, 92, 255, 0.18);
+  box-shadow: 0 4px 14px rgba(0, 108, 53, 0.18);
 }
 
 /* Universal keyboard focus ring (all controls) */

@@ -12,8 +12,8 @@
   border-radius: 8px;
   border: 1px solid var(--line);
   background: linear-gradient(135deg,
-      rgba(124, 92, 255, 0.06),
-      rgba(34, 211, 238, 0.04));
+      rgba(0, 108, 53, 0.06),
+      rgba(0, 153, 77, 0.04));
   color: var(--text);
   cursor: pointer;
   font-size: 18px;
@@ -33,16 +33,16 @@ html[data-theme="light"] {
   --text: #0b1220;
   --muted: #556778;
   --line: rgba(11, 18, 32, 0.06);
-  --accent-1: #6b46ff;
-  --accent-2: #0891b2;
+  --accent-1: #006C35;
+  --accent-2: #00994D;
 }
 
 html[data-theme="light"] body {
   background: radial-gradient(1200px 1200px at 10% -10%,
-      rgba(124, 92, 255, 0.06),
+      rgba(0, 108, 53, 0.06),
       transparent 60%),
     radial-gradient(1000px 1000px at 110% -10%,
-      rgba(8, 145, 178, 0.04),
+      rgba(0, 153, 77, 0.04),
       transparent 55%),
     var(--bg);
   color: var(--text);
@@ -91,8 +91,8 @@ html[data-theme="light"] .btn.ghost {
 
 html[data-theme="light"] .file-trigger {
   background: linear-gradient(135deg,
-      rgba(124, 92, 255, 0.06),
-      rgba(8, 145, 178, 0.04));
+      rgba(0, 108, 53, 0.06),
+      rgba(0, 153, 77, 0.04));
   color: var(--text);
   border: 1px solid var(--line);
 }
@@ -115,8 +115,8 @@ html[data-theme="light"] .meter {
 /* Buttons keep light-mode hover shadow + blue ring; others border-only */
 html[data-theme="light"] button:hover:not(:disabled),
 html[data-theme="light"] .btn:hover:not(:disabled) {
-  box-shadow: 0 8px 22px rgba(107, 70, 255, 0.16),
-    0 0 0 3px rgba(107, 70, 255, 0.12);
+  box-shadow: 0 8px 22px rgba(0, 108, 53, 0.16),
+    0 0 0 3px rgba(0, 108, 53, 0.12);
 }
 
 html[data-theme="light"] .file-trigger:hover,
@@ -125,5 +125,5 @@ html[data-theme="light"] select:hover,
 html[data-theme="light"] input[type="color"]:hover,
 html[data-theme="light"] input[type="range"]:hover,
 html[data-theme="light"] input[type="text"]:hover {
-  box-shadow: 0 0 0 3px rgba(107, 70, 255, 0.12);
+  box-shadow: 0 0 0 3px rgba(0, 108, 53, 0.12);
 }

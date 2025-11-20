@@ -9,8 +9,8 @@
   --text: #e8eef9;
   --muted: #9fb0cc;
   --line: rgba(255, 255, 255, 0.08);
-  --accent-1: #7c5cff;
-  --accent-2: #22d3ee;
+  --accent-1: #006C35;
+  --accent-2: #00994D;
   --radius: 16px;
   --gap: 14px;
 
@@ -23,8 +23,7 @@
   --previewMaxMobile: 210px;
 
   /* Hover & focus tokens */
-  --hover-ring: rgba(124, 92, 255, 0.35);
-  --hover-border: rgba(124, 92, 255, 0.55);
-  --hover-shadow-btn: 0 8px 22px rgba(124, 92, 255, 0.22);
+  --hover-ring: rgba(0, 108, 53, 0.35);
+  --hover-border: rgba(0, 108, 53, 0.55);
+  --hover-shadow-btn: 0 8px 22px rgba(0, 108, 53, 0.22);
 }
-
