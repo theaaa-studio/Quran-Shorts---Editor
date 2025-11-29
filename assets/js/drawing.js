@@ -291,10 +291,9 @@ function drawPreview() {
     const boxPadY = 50 * scale;
     const boxW = maxLineWidth + boxPadX * 2;
     
-    // Box Top = screenInkTop
-    // Box Bottom = screenInkTop + totalVisualH
-    const boxTop = screenInkTop;
-    const boxH = totalVisualH;
+    // Box dimensions based on text content only (label is outside)
+    const boxTop = screenInkTop - boxPadY;
+    const boxH = totalVisualH + boxPadY * 2;
     
     pctx.save();
     pctx.globalAlpha = window.backgroundModule.getTextBoxOpacity() || 0.12;
@@ -302,9 +301,9 @@ function drawPreview() {
     drawRoundedRect(
         pctx,
         (W - boxW) / 2, // Center horizontally
-        boxTop - boxPadY,
+        boxTop,
         boxW,
-        boxH + boxPadY * 2,
+        boxH,
         20 // Radius
     );
     pctx.fill();
@@ -339,14 +338,9 @@ function drawPreview() {
     // --- Draw Label (Ayah Number) ---
     pctx.font = `600 36px ${selectedFont}`;
     pctx.fillStyle = fontColor;
-    pctx.textAlign = "center";
-    // Position below the last line of translation
-    // transY is the middle of the first line.
-    // Last line Y = transY + (lines - 1) * lh
-    // We want to be below that.
-    const lastTransLineY = transY + (transSpec.lines.length - 1) * transSpec.lineHeight;
-    const labelY = lastTransLineY + transSpec.lineHeight + 20; 
-    pctx.fillText(currentLabel, W / 2, labelY);
+    pctx.textAlign = "right";
+    // Position at bottom-right of the preview canvas
+    pctx.fillText(currentLabel, W - 40, H - 60);
 
   } else {
     // Original single-text logic
@@ -363,12 +357,46 @@ function drawPreview() {
     );
     const { fontSize, lines, lineHeight } = spec;
 
+    // --- Calculate dimensions for background box ---
+    const labelHeight = 36;
+    const labelGap = 20;
+    const boxPadX = 50 * scale;
+    const boxPadY = 50 * scale;
+    
+    // Measure max line width including label
+    pctx.font = `700 ${fontSize}px ${selectedFont}`;
+    let maxLineWidth = 0;
+    lines.forEach(line => {
+      const w = pctx.measureText(line).width;
+      if (w > maxLineWidth) maxLineWidth = w;
+    });
+    
+    const boxW = maxLineWidth + boxPadX * 2;
+    const totalH = lines.length * lineHeight;
+    
+    // Center the text content only (label is outside)
+    let y = (H - totalH) / 2;
+    
+    // --- Draw Background Box ---
+    pctx.save();
+    pctx.globalAlpha = window.backgroundModule.getTextBoxOpacity() || 0.12;
+    pctx.fillStyle = window.backgroundModule.getTextBoxColor() || "#000";
+    drawRoundedRect(
+      pctx,
+      (W - boxW) / 2,
+      y - boxPadY,
+      boxW,
+      totalH + boxPadY * 2,
+      20
+    );
+    pctx.fill();
+    pctx.restore();
+
+    // --- Draw Text ---
     pctx.fillStyle = fontColor;
     pctx.textAlign = "center";
     pctx.textBaseline = "middle";
     pctx.font = `700 ${fontSize}px ${selectedFont}`;
-    const totalH = lines.length * lineHeight;
-    let y = H / 2 - totalH / 2;
     pctx.save();
     pctx.shadowColor = "rgba(0,0,0,0.14)";
     pctx.shadowBlur = 8;
@@ -378,10 +406,9 @@ function drawPreview() {
     // --- Draw Label (Ayah Number) ---
     pctx.font = `600 36px ${selectedFont}`;
     pctx.fillStyle = fontColor;
-    // Position below the last line
-    const lastLineY = y + (lines.length - 1) * lineHeight;
-    const labelY = lastLineY + lineHeight + 20;
-    pctx.fillText(currentLabel, W / 2, labelY);
+    pctx.textAlign = "right";
+    // Position at bottom-right of the preview canvas
+    pctx.fillText(currentLabel, W - 40, H - 60);
   }
 
   // Bottom label (Removed)
