@@ -1,3 +1,14 @@
+# Robots.txt for Quran Shorts Editor
+# Last updated: 2025-11-30
+
 User-agent: *
 Allow: /
+Allow: /index.html
+Allow: /assets/
+Disallow: /googleff29b73cbd079fa0.html
+
+# Crawl delay (in seconds) - adjust based on your server capacity
+Crawl-delay: 1
+
+# Sitemap declaration for search engines
 Sitemap: https://theaaa-studio.github.io/Quran-Shorts---Editor/sitemap.xml
