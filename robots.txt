@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://theaaa-studio.github.io/Quran-Shorts---Editor/sitemap.xml
