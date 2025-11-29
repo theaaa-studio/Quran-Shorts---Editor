@@ -56,7 +56,10 @@ function populateSelectFromList(list) {
   const bgMediaSelect = $("#bgMediaSelect");
   const bgMediaHint = $("#bgMediaHint");
   if (!bgMediaSelect || !bgMediaHint) {
-    console.warn("populateSelectFromList: Elements not found", { bgMediaSelect: !!bgMediaSelect, bgMediaHint: !!bgMediaHint });
+    console.warn("populateSelectFromList: Elements not found", {
+      bgMediaSelect: !!bgMediaSelect,
+      bgMediaHint: !!bgMediaHint,
+    });
     return;
   }
 
@@ -95,12 +98,26 @@ function populateSelectFromList(list) {
     .join("");
 
   bgMediaSelect.disabled = false;
-  bgMediaHint.textContent = `Available: ${bgMediaList.length} item(s). ${
-    userUploads.length ? `(${userUploads.length} from your uploads)` : ""
-  }`;
+  // Show upload indicators if there are user uploads
+  if (userUploads.length) {
+    bgMediaHint.textContent = `Upload ${userUploads.length}`;
+  } else {
+    bgMediaHint.textContent = "Ready";
+  }
+
+  // Ensure select has a value
   if (bgMediaSelect.value === "" || bgMediaSelect.value == null) {
     bgMediaSelect.value = "0";
   }
+
+  // Mirror the visible selected text into the overlay element (used on mobile)
+  const bgMediaValueEl = $("#bgMediaValue");
+  if (bgMediaValueEl) {
+    const selIdx = parseInt(bgMediaSelect.value, 10) || 0;
+    const opt = bgMediaSelect.options[selIdx];
+    bgMediaValueEl.textContent = opt ? opt.textContent.trim() : "";
+  }
+
   onBgMediaChange();
 }
 
@@ -138,7 +155,7 @@ async function loadBackgroundAssets() {
     }
 
     populateSelectFromList(normalized);
-    if (bgMediaHint) bgMediaHint.textContent = "Loaded";
+    // Don't override bgMediaHint since populateSelectFromList will set it
   } catch (e) {
     console.warn("Failed to load background.json:", e);
     if (DEFAULT_BG_MEDIA.length) {
@@ -157,26 +174,38 @@ function handleUserUploads(fileList) {
   console.log("handleUserUploads called with", fileList.length, "files");
   if (!fileList || !fileList.length) return;
 
-  // Revoke old URLs
-  revokeUserUploadURLs();
-  userUploads = [];
+  const uploadStartIndex = userUploads.length; // Track where new uploads start
+  const uploadCount = fileList.length; // How many files are being uploaded
 
-  // Create new uploads
+  // Create new uploads and append to existing ones (don't clear)
   for (const f of fileList) {
     const url = URL.createObjectURL(f);
     const isVideo = (f.type || "").startsWith("video");
     const isImage = (f.type || "").startsWith("image");
-    console.log("Processing file:", f.name, "type:", f.type, "isVideo:", isVideo, "isImage:", isImage);
+    console.log(
+      "Processing file:",
+      f.name,
+      "type:",
+      f.type,
+      "isVideo:",
+      isVideo,
+      "isImage:",
+      isImage
+    );
     if (!isVideo && !isImage) continue;
 
     userUploads.push({
       src: url,
       type: isVideo ? "video" : "image",
-      name: `📥 ${f.name}`,
+      name: f.name,
       __blobUrl: true,
     });
   }
   console.log("User uploads processed. Total:", userUploads.length);
+
+  // Store upload batch info for hint display
+  window.lastUploadBatchSize = uploadCount;
+  window.lastUploadBatchStart = uploadStartIndex;
 
   // Re-populate select using existing baseMediaList
   populateSelectFromList(null); // passing null to use existing baseMediaList
@@ -193,6 +222,17 @@ function onBgMediaChange() {
 
   // Update the exported object's selectedBg property
   window.backgroundModule.selectedBg = selectedBg;
+
+  // Update overlay value (mobile-friendly truncated label)
+  try {
+    const bgMediaValueEl = document.getElementById("bgMediaValue");
+    if (bgMediaValueEl) {
+      const opt = bgMediaSelect.options[idx];
+      bgMediaValueEl.textContent = opt ? opt.textContent.trim() : "";
+    }
+  } catch (e) {
+    // ignore
+  }
 
   if (!selectedBg) return;
 

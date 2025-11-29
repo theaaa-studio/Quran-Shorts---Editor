@@ -296,6 +296,10 @@
 
 @media (max-width: 600px) {
   .background-panel .inline-row select {
-    width: 100%;
+    width: auto;
+    max-width: 150px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
   }
 }
