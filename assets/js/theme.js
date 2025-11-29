@@ -1,14 +1,26 @@
 // ------------------ Theme (dark / light) ------------------
+const THEME_LIGHT = "light";
+const THEME_DARK = "dark";
+
 function applyTheme(theme) {
-  const t = theme === "light" ? "light" : "dark";
+  const t = theme === THEME_DARK ? THEME_DARK : THEME_LIGHT;
+
+  // 1) Set attribute on <html>
   try {
     document.documentElement.setAttribute("data-theme", t);
   } catch (e) {}
+
+  // 2) Update button icon + aria to match the *current* theme
   const btn = document.getElementById("themeToggle");
   if (btn) {
-    btn.textContent = t === "light" ? "☀️" : "🌙";
-    btn.setAttribute("aria-pressed", t === "light" ? "true" : "false");
+    // Icon always reflects active theme
+    btn.textContent = t === THEME_LIGHT ? "☀️" : "🌙";
+
+    // aria-pressed = true when dark mode is ON (you can flip if you prefer)
+    btn.setAttribute("aria-pressed", t === THEME_DARK ? "true" : "false");
   }
+
+  // 3) Persist
   try {
     localStorage.setItem("theme", t);
   } catch (e) {}
@@ -17,10 +29,13 @@ function applyTheme(theme) {
 (function initTheme() {
   try {
     const saved = localStorage.getItem("theme");
-    const prefersLight =
+
+    // Default is LIGHT, but if OS prefers DARK, use DARK
+    const prefersDark =
       window.matchMedia &&
-      window.matchMedia("(prefers-color-scheme: light)").matches;
-    const theme = saved || (prefersLight ? "light" : "dark");
+      window.matchMedia("(prefers-color-scheme: dark)").matches;
+
+    const theme = saved || (prefersDark ? THEME_DARK : THEME_LIGHT);
     applyTheme(theme);
   } catch (e) {
     /* ignore */
@@ -31,11 +46,13 @@ function applyTheme(theme) {
 document.addEventListener("click", (ev) => {
   const t = ev.target;
   if (t && t.id === "themeToggle") {
-    const cur =
-      document.documentElement.getAttribute("data-theme") === "light"
-        ? "light"
-        : "dark";
-    applyTheme(cur === "light" ? "dark" : "light");
+    // Always read current theme from the DOM so icon + color stay aligned
+    const currentAttr =
+      document.documentElement.getAttribute("data-theme") === THEME_DARK
+        ? THEME_DARK
+        : THEME_LIGHT;
+
+    const nextTheme = currentAttr === THEME_LIGHT ? THEME_DARK : THEME_LIGHT;
+    applyTheme(nextTheme);
   }
 });
-
