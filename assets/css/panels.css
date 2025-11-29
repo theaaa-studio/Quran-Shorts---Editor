@@ -121,3 +121,45 @@ label.small {
     flex-wrap: wrap;
   }
 }
+
+/* Input Panel: Single Row Layout */
+.input-row {
+  display: flex;
+  gap: 12px;
+  align-items: flex-end;
+  width: 100%;
+  flex-wrap: wrap;
+}
+
+.input-row .field {
+  flex: 0 0 auto;
+  /* Stop growing/shrinking, respect width */
+  min-width: 0;
+}
+
+/* Fixed Sizes for PC */
+.field-surah {
+  width: 180px;
+}
+
+.field-ayah-start {
+  width: 120px;
+}
+
+.field-ayah-end {
+  width: 120px;
+}
+
+.field-reciter {
+  width: 220px;
+}
+
+.field-translation {
+  width: 220px;
+}
+
+/* Ayah Dropdowns: Wider minimum width (fallback) */
+#ayahStart,
+#ayahEnd {
+  min-width: 15ch;
+}

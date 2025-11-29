@@ -170,7 +170,8 @@
   .three-col,
   .four-col-inline,
   .two-col-inline,
-  .typography-grid {
+  .typography-grid,
+  .input-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
     /* 2 columns on mobile */
@@ -180,6 +181,15 @@
   /* Specific overrides for very small items */
   .field {
     gap: 2px;
+  }
+
+  /* Reset fixed widths for mobile */
+  .field-surah,
+  .field-ayah-start,
+  .field-ayah-end,
+  .field-reciter,
+  .field-translation {
+    width: auto;
   }
 
   /* 4) Background panel: keep options readable */
