@@ -27,7 +27,7 @@ let bgModeColor,
   bgMediaHint,
   bgUploadInput;
 let previewCanvas, pctx;
-let buildPreviewBtn, downloadBtn, previewPlayBtn, dismissBtn;
+let buildPreviewBtn, downloadBtn, previewPlayBtn, dismissBtn, takePictureBtn;
 let volumeSlider, volumeVal;
 let audio, recStatus, meterBar;
 
@@ -85,6 +85,7 @@ function initializeDOM() {
   window.pctx = pctx;
 
   buildPreviewBtn = $("#buildPreviewBtn");
+  takePictureBtn = $("#takePictureBtn");
   downloadBtn = $("#downloadBtn");
   previewPlayBtn = $("#previewPlayBtn");
   dismissBtn = $("#dismissBtn");
@@ -682,6 +683,71 @@ function setupEventListeners() {
       window.audioModule.updateAudioRouting();
       window.audioModule.setVolumeFromSlider();
       await window.audioModule.loadAndPlay({ record: false });
+    });
+  }
+
+  // Take Picture button
+  if (takePictureBtn) {
+    takePictureBtn.addEventListener("click", async () => {
+      // 1. Ensure audio graph (just in case, though we won't play audio)
+      await window.audioModule.ensureGraphOnGesture();
+      window.allowRecording = false; // No recording needed
+
+      // 2. Get range
+      const surahSel = $("#surah");
+      const ayahStartSel = $("#ayahStart");
+      const ayahEndSel = $("#ayahEnd");
+      const reciterSel = $("#reciter");
+      const sNum = +surahSel.value || 1;
+      const s = window.metadataModule.meta.surahs.find((x) => x.number === sNum);
+      const sName = s?.englishName || "Unknown";
+      const start = +ayahStartSel.value || 1;
+      const end = +ayahEndSel.value || 1;
+      const reciterName = reciterSel.options[reciterSel.selectedIndex]?.text || "Unknown";
+
+      if (start > end) {
+        alert("Invalid Ayah range.");
+        return;
+      }
+
+      // 3. Iterate and capture
+      for (let i = start; i <= end; i++) {
+        // Update session info so playIndex uses correct data
+        window.sessionSurah = sNum;
+        window.sessionSurahName = sName;
+        window.sessionFrom = start;
+        window.sessionTo = end;
+        window.sessionReciterName = reciterName;
+        
+        // Prepare playlist item for this specific ayah
+        // We need to make sure window.playlist has the item we want to play
+        // But playIndex uses window.playlist[i]. 
+        // Let's just reconstruct the playlist correctly first as loadAndPlay does.
+        window.playlist = [];
+        for (let a = start; a <= end; a++) {
+            window.playlist.push({ surah: sNum, ayah: a, sName: sName });
+        }
+        window.index = i - start; // Index in the playlist corresponding to Ayah i
+
+        // Load data (text, translation) but DO NOT autoplay
+        await window.audioModule.playIndex(window.index, false);
+
+        // Wait a bit for canvas to render (images/fonts might take a moment)
+        await new Promise((r) => setTimeout(r, 500)); 
+
+        // Capture canvas
+        const canvas = document.getElementById("previewCanvas");
+        if (canvas) {
+          const dataUrl = canvas.toDataURL("image/png");
+          const link = document.createElement("a");
+          const ts = timestampStr();
+          link.download = `Surah-${sNum}-${safe(sName)}_Ayah-${i}_${ts}.png`;
+          link.href = dataUrl;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+        }
+      }
     });
   }
 
