@@ -39,8 +39,18 @@
 }
 
 .ar-btn.active {
-  background: var(--primary);
+  background: var(--accent-1);
   color: #fff;
+}
+
+html[data-theme="light"] .ar-btn.active {
+  background: var(--accent-1);
+  color: #fff;
+}
+
+html[data-theme="light"] .ar-btn:hover {
+  color: var(--text);
+  background: rgba(0, 108, 53, 0.08);
 }
 
 .preview-stage {
