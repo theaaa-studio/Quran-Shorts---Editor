@@ -1120,15 +1120,23 @@ function setupMobileNav() {
 }
 
 // Wait for HTML partials to load before initializing
+let appInitialized = false;
+
+async function safeInitializeApp() {
+  if (appInitialized) return;
+  appInitialized = true;
+  await initializeApp();
+}
+
 if (document.readyState === "loading") {
-  window.addEventListener("htmlPartialsLoaded", initializeApp);
+  window.addEventListener("htmlPartialsLoaded", safeInitializeApp);
 } else {
   // If DOM is already loaded, wait a bit for partials or try immediately
-  window.addEventListener("htmlPartialsLoaded", initializeApp);
+  window.addEventListener("htmlPartialsLoaded", safeInitializeApp);
   // Also try after a short delay in case event already fired
   setTimeout(() => {
     if (document.getElementById("previewCanvas")) {
-      initializeApp();
+      safeInitializeApp();
     }
   }, 100);
 }
