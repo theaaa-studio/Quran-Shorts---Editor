@@ -554,6 +554,24 @@ function onAnyInputChange() {
 // Expose to window for metadata module
 window.onAnyInputChange = onAnyInputChange;
 
+// Update picture save count based on ayah selection
+function updatePictureSaveCount() {
+  const ayahStartSel = $("#ayahStart");
+  const ayahEndSel = $("#ayahEnd");
+  const pictureSaveCount = $("#pictureSaveCount");
+  
+  if (!ayahStartSel || !ayahEndSel || !pictureSaveCount) return;
+  
+  const start = +ayahStartSel.value || 1;
+  const end = +ayahEndSel.value || 1;
+  const count = Math.max(1, end - start + 1);
+  
+  pictureSaveCount.textContent = `(${count})`;
+}
+
+// Expose to window for metadata module
+window.updatePictureSaveCount = updatePictureSaveCount;
+
 function setupEventListeners() {
   [
     reciterSel,
@@ -696,6 +714,18 @@ function setupEventListeners() {
   if (surahSel) {
     surahSel.addEventListener("change", () => {
       window.metadataModule.updateAyahRange();
+    });
+  }
+
+  // Wire up ayah range changes to update picture count
+  if (ayahStartSel) {
+    ayahStartSel.addEventListener("change", () => {
+      updatePictureSaveCount();
+    });
+  }
+  if (ayahEndSel) {
+    ayahEndSel.addEventListener("change", () => {
+      updatePictureSaveCount();
     });
   }
 

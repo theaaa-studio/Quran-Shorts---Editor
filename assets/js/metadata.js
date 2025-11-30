@@ -59,10 +59,17 @@ function updateAyahRange() {
   const handler = () => {
     if (+ayahEndSel.value < +ayahStartSel.value)
       ayahEndSel.value = ayahStartSel.value;
+    if (window.updatePictureSaveCount) {
+      window.updatePictureSaveCount();
+    }
   };
   ayahStartSel.addEventListener("change", handler, { once: true });
   if (window.onAnyInputChange) {
     window.onAnyInputChange();
+  }
+  // Update picture count on initial load
+  if (window.updatePictureSaveCount) {
+    window.updatePictureSaveCount();
   }
 }
 
