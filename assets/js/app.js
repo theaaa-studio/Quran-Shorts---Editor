@@ -762,12 +762,15 @@ function setupEventListeners() {
       const ayahStartSel = $("#ayahStart");
       const ayahEndSel = $("#ayahEnd");
       const reciterSel = $("#reciter");
+      const translationEditionSel = $("#translationEdition");
       const sNum = +surahSel.value || 1;
       const s = window.metadataModule.meta.surahs.find((x) => x.number === sNum);
       const sName = s?.englishName || "Unknown";
       const start = +ayahStartSel.value || 1;
       const end = +ayahEndSel.value || 1;
       const reciterName = reciterSel.options[reciterSel.selectedIndex]?.text || "Unknown";
+      const translationEdition = translationEditionSel?.value || window.translationEdition || "en.sahih";
+      const translationName = translationEdition.replace(/\./g, "-");
 
       if (start > end) {
         alert("Invalid Ayah range.");
@@ -781,7 +784,7 @@ function setupEventListeners() {
       if (imageCount > 5) {
         // Create zip file
         const zip = new JSZip();
-        const folder = zip.folder(`Surah-${sNum}-${safe(sName)}_Ayah-${start}-${end}`);
+        const folder = zip.folder(`Surah-${sNum}-${safe(sName)}_Ayah-${start}-${end}_${translationName}`);
 
         // Show progress (optional)
         const recStatus = $("#recStatus");
@@ -819,7 +822,7 @@ function setupEventListeners() {
             });
             
             // Add to zip
-            const filename = `Surah-${sNum}-${safe(sName)}_Ayah-${i}.png`;
+            const filename = `Surah-${sNum}-${safe(sName)}_Ayah-${i}_${translationName}.png`;
             folder.file(filename, blob);
 
             // Update progress
@@ -837,7 +840,7 @@ function setupEventListeners() {
         const zipBlob = await zip.generateAsync({ type: "blob" });
         const zipUrl = URL.createObjectURL(zipBlob);
         const link = document.createElement("a");
-        link.download = `Surah-${sNum}-${safe(sName)}_Ayah-${start}-${end}_${ts}.zip`;
+        link.download = `Surah-${sNum}-${safe(sName)}_Ayah-${start}-${end}_${translationName}_${ts}.zip`;
         link.href = zipUrl;
         document.body.appendChild(link);
         link.click();
@@ -876,7 +879,7 @@ function setupEventListeners() {
           if (canvas) {
             const dataUrl = canvas.toDataURL("image/png");
             const link = document.createElement("a");
-            link.download = `Surah-${sNum}-${safe(sName)}_Ayah-${i}_${ts}.png`;
+            link.download = `Surah-${sNum}-${safe(sName)}_Ayah-${i}_${translationName}_${ts}.png`;
             link.href = dataUrl;
             document.body.appendChild(link);
             link.click();
@@ -940,11 +943,13 @@ function setupEventListeners() {
     downloadBtn.addEventListener("click", () => {
       if (!window.finalBlob) return;
       const ts = timestampStr();
+      const translationEdition = window.translationEdition || "en.sahih";
+      const translationName = translationEdition.replace(/\./g, "-");
       const filename = `Surah-${window.sessionSurah}-${safe(
         window.sessionSurahName
       )}_Ayah-${window.sessionFrom}-${window.sessionTo}_${safe(
         window.sessionReciterName
-      )}_${ts}.webm`;
+      )}_${translationName}_${ts}.webm`;
       const url = URL.createObjectURL(window.finalBlob);
       const a = document.createElement("a");
       a.href = url;
