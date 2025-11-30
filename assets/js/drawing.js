@@ -385,7 +385,9 @@ function drawPreview() {
     const boxH = totalGroupH + boxPadY * 2;
     
     pctx.save();
-    pctx.globalAlpha = window.backgroundModule.getTextBoxOpacity() || 0.12;
+    pctx.globalAlpha = window.backgroundModule.getTextBoxOpacity() !== undefined 
+      ? window.backgroundModule.getTextBoxOpacity() 
+      : 0.12;
     pctx.fillStyle = window.backgroundModule.getTextBoxColor() || "#000";
     drawRoundedRect(
         pctx,
@@ -477,7 +479,9 @@ function drawPreview() {
     
     // --- Draw Background Box ---
     pctx.save();
-    pctx.globalAlpha = window.backgroundModule.getTextBoxOpacity() || 0.12;
+    pctx.globalAlpha = window.backgroundModule.getTextBoxOpacity() !== undefined 
+      ? window.backgroundModule.getTextBoxOpacity() 
+      : 0.12;
     pctx.fillStyle = window.backgroundModule.getTextBoxColor() || "#000";
     drawRoundedRect(
       pctx,
