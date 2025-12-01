@@ -1,4 +1,4 @@
-# Quran Shorts – Editor
+# Islamic Shorts Editor
 
 I started this project after noticing how many channels were beautifully sharing short clips of Qur’ān āyāt to spread dīn worldwide. It inspired me to think: _what if I could build an editor to make it easier for anyone to create these?_ Software development is simply the skill Allah blessed me with, and this is my small, humble effort to use it for His sake — to help others share His words with clarity and care.
 
@@ -32,7 +32,7 @@ I started this project after noticing how many channels were beautifully sharing
 
 ```bash
 # Clone
-git clone https://github.com/<your-org>/quran-shorts-editor.git
+git clone https://github.com/<your-org>/islamic-shorts-editor.git
 cd quran-shorts-editor
 
 # Serve the folder over HTTP
