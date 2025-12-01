@@ -199,7 +199,8 @@
   .field-ayah-start,
   .field-ayah-end,
   .field-reciter,
-  .field-translation {
+  .field-translation,
+  .field-translation-style {
     width: auto;
   }
 

@@ -259,7 +259,7 @@ function drawPreview() {
   const scale = (sizePercent || 100) / 100;
   const arabicScale = (window.arabicSizePercent || 100) / 100;
 
-  const currentArabic = window.currentArabicText || "";
+  const currentArabic = (window.showArabicText !== false) ? (window.currentArabicText || "") : "";
 
   if (currentArabic) {
     // Split space: We want the ENTIRE GROUP (Arabic + Translation) CENTERED vertically.

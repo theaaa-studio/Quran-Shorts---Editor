@@ -67,8 +67,9 @@ label.small {
 }
 
 .typography-grid {
-  display: grid;
-  grid-template-columns: 0.5fr 1fr 1fr 0.5fr 1fr 1fr;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
   gap: 12px;
 }
 
@@ -88,6 +89,8 @@ label.small {
   background: #0c1117;
   transition: border-color 0.12s ease, box-shadow 0.12s ease,
     transform 0.12s ease;
+  width: fit-content;
+  white-space: nowrap;
 }
 
 .toggle input {
@@ -162,4 +165,8 @@ label.small {
 #ayahStart,
 #ayahEnd {
   min-width: 15ch;
+}
+
+.field-translation-style {
+  width: 140px;
 }
