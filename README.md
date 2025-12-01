@@ -8,7 +8,7 @@ I started this project after noticing how many channels were beautifully sharing
 
 ## 🎬 Demo Video
 
-[![Watch the video](https://img.youtube.com/vi/-nJW5pxpJnE/0.jpg)](https://www.youtube.com/watch?v=-nJW5pxpJnE)
+[![Watch the video](https://img.youtube.com/vi/-nJW5pxpJnE/0.jpg)](https://www.youtube.com/watch?v=ZcmFbd3Dn4k)
 
 ---
 
