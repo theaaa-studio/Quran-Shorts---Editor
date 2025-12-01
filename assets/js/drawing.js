@@ -502,7 +502,9 @@ function drawPreview() {
     pctx.save();
     pctx.shadowColor = "rgba(0,0,0,0.14)";
     pctx.shadowBlur = 8;
-    lines.forEach((ln, i) => pctx.fillText(ln, W / 2, startY + i * lineHeight));
+    lines.forEach((ln, i) =>
+      pctx.fillText(ln, W / 2, startY + lineHeight / 2 + i * lineHeight)
+    );
     pctx.restore();
 
     // --- Draw Label (Ayah Number) inside box ---

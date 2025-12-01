@@ -45,13 +45,30 @@ body {
 .logo {
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 1rem;
+    justify-content: space-between;
+    width: 100%;
     margin-bottom: 1rem;
+    position: relative;
+}
+
+.brand-group {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .logo img {
     height: 60px;
+    position: relative;
+    z-index: 1;
+}
+
+.logo .theme-toggle {
+    position: relative;
+    z-index: 1;
 }
 
 .logo h1 {
@@ -203,22 +220,38 @@ body {
     }
 
     .logo {
-        flex-direction: row;
-        justify-content: space-between;
+        display: flex;
         align-items: center;
-        gap: 0.5rem;
+        justify-content: space-between;
+        width: 100%;
         margin-bottom: 0.5rem;
+        position: relative;
+    }
+
+    .brand-group {
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
 
     .logo img {
         height: 40px;
         flex-shrink: 0;
+        position: relative;
+        z-index: 1;
     }
 
     .logo h1 {
         font-size: 1rem;
         text-align: center;
-        flex: 1;
+    }
+
+    .logo .theme-toggle {
+        position: relative;
+        z-index: 1;
     }
 
     .theme-toggle {
@@ -262,12 +295,17 @@ body {
     .landing-footer {
         margin-top: 2rem;
         padding-top: 1.5rem;
+        display: flex;
+        justify-content: center;
+        align-items: center;
     }
 
     .developer-link {
         font-size: 0.8rem;
-        flex-wrap: wrap;
+        display: flex;
+        align-items: center;
         justify-content: center;
+        text-align: center;
     }
 }
 
