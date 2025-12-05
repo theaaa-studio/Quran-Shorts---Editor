@@ -98,6 +98,32 @@ body {
     font-size: 1.2rem;
 }
 
+.how-to-use {
+    margin-top: 1.5rem;
+    display: flex;
+    justify-content: center;
+}
+
+.tutorial-link {
+    color: var(--accent-1);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 1rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 1.2rem;
+    border-radius: 50px;
+    transition: all 0.2s ease;
+    border: 1px solid rgba(0, 108, 53, 0.2);
+}
+
+.tutorial-link:hover {
+    background: rgba(0, 108, 53, 0.1);
+    border-color: var(--accent-1);
+    transform: translateY(-2px);
+}
+
 .options-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
