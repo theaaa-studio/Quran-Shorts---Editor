@@ -24,7 +24,7 @@ const TEMPLATES = {
         <!-- Panel: Input -->
         <div class="panel">
           <h3>Choose</h3>
-          <div class="input-row">
+          <div class="input-row hadith-input-row">
             <div class="field field-book">
               <label class="small" for="hadithBook">Book</label>
               <select id="hadithBook"></select>

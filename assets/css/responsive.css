@@ -23,6 +23,12 @@
   #previewCanvas {
     width: min(100%, var(--previewMaxMobile));
   }
+
+  /* Force Reciter/Translation to full width in Grid mode (Tablet) */
+  .field-reciter,
+  .field-translation {
+    grid-column: 1 / -1;
+  }
 }
 
 /* ===================== Better Mobile Layout (phones only) ===================== */
@@ -293,7 +299,7 @@
     border: 1px solid rgba(255, 255, 255, 0.15);
     padding: 8px 16px;
     border-radius: 32px;
-    gap: 12px;
+    gap: 5px;
   }
 
   .transport {
@@ -353,7 +359,7 @@
   .preview-header {
     padding: 1px !important;
     border-radius: 8px !important;
-    top: 0px !important;
+    top: 8px !important;
   }
 
   .ar-btn {
@@ -439,7 +445,7 @@
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
-    gap: 12px;
+    gap: 5px;
   }
 
   /* Surah takes full width */
@@ -463,18 +469,19 @@
   }
 
   /* Reciter connects with Translation */
+  /* Reciter connects with Translation */
   .field-reciter {
-    flex: 1;
-    min-width: 0;
-    /* Allow shrinking */
+    width: 100% !important;
+    min-width: 100% !important;
+    flex: 0 0 100% !important;
     order: 3;
   }
 
   /* Translation connects with Reciter */
   .field-translation {
-    flex: 1;
-    min-width: 0;
-    /* Allow shrinking */
+    width: 100% !important;
+    min-width: 100% !important;
+    flex: 0 0 100% !important;
     order: 3;
   }
 
@@ -516,5 +523,13 @@
     text-overflow: ellipsis;
     white-space: nowrap;
     overflow: hidden;
+  }
+
+  /* Hadith Input Specifics: Stack all 3 fields */
+  .hadith-input-row .field {
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    flex: 0 0 100% !important;
   }
 }

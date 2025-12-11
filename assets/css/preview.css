@@ -20,7 +20,7 @@
 /* Header (AR Toggles) - Overlay Top Center */
 .preview-header {
   position: absolute;
-  top: 16px;
+  top: 26px;
   left: 50%;
   transform: translateX(-50%);
   right: auto;
