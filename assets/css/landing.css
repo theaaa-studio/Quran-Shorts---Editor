@@ -81,18 +81,10 @@ body {
 
 /* Theme-specific gradients for the title */
 :root .logo h1 {
-    background: linear-gradient(135deg, #e8eef9 0%, #9fb0cc 100%);
-    background-clip: text;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    color: var(--text);
 }
 
-[data-theme="light"] .logo h1 {
-    background: linear-gradient(135deg, #1a1d2e 0%, #4a5568 100%);
-    background-clip: text;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-}
+
 
 .landing-message {
     color: var(--muted);
