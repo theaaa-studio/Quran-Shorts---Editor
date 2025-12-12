@@ -283,6 +283,6 @@ button i {
 label.small {
   font: var(--md-sys-typescale-label-small);
   color: var(--md-sys-color-on-surface-variant);
-  margin-bottom: 8px;
+  margin-bottom: 4px;
   display: block;
 }
