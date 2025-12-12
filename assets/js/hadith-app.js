@@ -119,6 +119,100 @@ window.hasAudioError = false;
 window.wasDismissed = false;
 window.allowRecording = true;
 
+// ------------------ Font Filtering Logic ------------------
+let ALL_FONTS_CACHE = []; // Store original options
+
+// Map languages to font keywords/families
+const LANGUAGE_FONT_MAP = {
+  'Bengali': ['Bengali', 'Bangla', 'Hind Siliguri', 'Noto Sans Bengali', 'Baloo Da 2', 'Mukta'],
+  'Hindi': ['Hindi', 'Devanagari', 'Noto Sans Devanagari', 'Hind', 'Tiro Devanagari'],
+  'Chinese': ['Chinese', 'SC', 'TC', 'Ma Shan Zheng'],
+  'Japanese': ['Japanese', 'JP', 'M PLUS'],
+  'Korean': ['Korean', 'KR', 'Black Han Sans'],
+  'Thai': ['Thai', 'Prompt'],
+  'Vietnamese': ['Vietnamese', 'Be Vietnam'],
+  'Russian': ['Cyrillic', 'Russian', 'Roboto', 'Noto Sans'],
+  'Thai': ['Thai', 'Prompt'],
+  'Vietnamese': ['Vietnamese', 'Be Vietnam'],
+  'Russian': ['Cyrillic', 'Russian', 'Roboto', 'Noto Sans'],
+  'Ukrainian': ['Cyrillic', 'Roboto', 'Noto Sans'],
+  'Arabic': ['Amiri', 'Cairo', 'Scheherazade', 'Reem Kufi', 'Noto Naskh', 'Noto Kufi', 'IBM Plex', 'Tajawal', 'El Messiri', 'Markazi', 'Lateef', 'Harmattan', 'Aref Ruqaa', 'Katibeh', 'Lalezar', 'Rakkas', 'Mada', 'Almarai', 'Changa'],
+  'Urdu': ['Amiri', 'Cairo', 'Scheherazade', 'Reem Kufi', 'Noto Naskh', 'Noto Kufi', 'IBM Plex', 'Tajawal', 'El Messiri', 'Markazi', 'Lateef', 'Harmattan', 'Aref Ruqaa', 'Katibeh', 'Lalezar', 'Rakkas', 'Mada', 'Almarai', 'Changa'],
+  // Default fallback for Latin/Western languages
+  'default': ['Inter', 'Poppins', 'Lora', 'Merriweather', 'Nunito', 'Roboto', 'Montserrat', 'Open Sans', 
+              'Source Sans', 'Work Sans', 'Raleway', 'Lato', 'Oswald', 'Ubuntu', 'PT Sans', 'Karla', 
+              'Rubik', 'Heebo', 'Barlow', 'Manrope', 'Space Grotesk', 'Fira', 'Playfair', 'DM Serif', 
+              'Libre', 'Quicksand', 'Space Mono', 'JetBrains']
+};
+
+function captureAllFonts() {
+  if (ALL_FONTS_CACHE.length > 0) return; // Already captured
+  
+  const picker = document.getElementById("fontPicker");
+  if (!picker) return;
+  
+  // Save all options
+  Array.from(picker.options).forEach(opt => {
+    ALL_FONTS_CACHE.push({
+      value: opt.value,
+      text: opt.text,
+      label: opt.parentElement.tagName === 'OPTGROUP' ? opt.parentElement.label : null
+    });
+  });
+  console.log(`Captured ${ALL_FONTS_CACHE.length} font options.`);
+}
+
+function updateFontPickerForLanguage(language) {
+  const picker = document.getElementById("fontPicker");
+  if (!picker || ALL_FONTS_CACHE.length === 0) return;
+  
+  const currentVal = picker.value;
+  picker.innerHTML = ""; // Clear current options
+  
+  // Determine relevant keywords
+  // Check if we have specific mapping
+  let keywords = [];
+  let isSpecific = false;
+  
+  // Normalize language check
+  const langKey = Object.keys(LANGUAGE_FONT_MAP).find(k => language.includes(k));
+  
+  if (langKey) {
+    keywords = LANGUAGE_FONT_MAP[langKey];
+    isSpecific = true;
+  } else {
+    // Default to Latin fonts if no specific script found
+    keywords = LANGUAGE_FONT_MAP['default'];
+  }
+  
+  // Filter options
+  const filteredOpts = ALL_FONTS_CACHE.filter(opt => {
+    // Always include the currently selected one to prevent jumping if possible (though we might want to force change)
+    // Actually, if we switch languages, we probably WANT to switch fonts to avoid tofu.
+    
+    // Check if option text contains any keyword
+    return keywords.some(k => opt.text.includes(k));
+  });
+  
+  // If no fonts matched (rare), fall back to everything or default
+  const finalizedOpts = filteredOpts.length > 0 ? filteredOpts : ALL_FONTS_CACHE;
+  
+  // append options
+  finalizedOpts.forEach(opt => {
+    const el = document.createElement("option");
+    el.value = opt.value;
+    el.textContent = opt.text;
+    picker.appendChild(el);
+  });
+  
+  // Select first option
+  if (finalizedOpts.length > 0) {
+    picker.selectedIndex = 0;
+    // Update global state
+    window.selectedFont = picker.value;
+  }
+}
+
 // ------------------ Aspect Ratio Logic ------------------
 function setAspectRatio(type) {
   if (!previewCanvas) return;
@@ -221,7 +315,22 @@ function setupEventListeners() {
   ]
     .filter(Boolean)
     .forEach((el) => {
-      el.addEventListener("change", onAnyInputChange);
+      // Special handling for edition change to update fonts
+      if (el === hadithEditionSel) {
+        el.addEventListener("change", () => {
+          // Get selected option text to find language
+          const selectedOpt = hadithEditionSel.options[hadithEditionSel.selectedIndex];
+          if (selectedOpt) {
+            // Text format: "Language - Author"
+            const lang = selectedOpt.textContent.split('-')[0].trim();
+            updateFontPickerForLanguage(lang);
+          }
+          onAnyInputChange();
+        });
+      } else {
+        el.addEventListener("change", onAnyInputChange);
+      }
+
       if (
         el === textSize ||
         el === arabicTextSize ||
@@ -509,6 +618,11 @@ async function initializeApp() {
   
   setPanelNumbers();
   setupMobileNav();
+  
+  setupMobileNav();
+  
+  // Capture initial fonts
+  captureAllFonts();
   
   // Initial draw
   window.drawingModule.drawPreview();
