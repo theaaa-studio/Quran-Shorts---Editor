@@ -198,6 +198,7 @@ body {
 /* Subtle shift on card hover */
 .option-card:hover .btn {
     background: var(--md-ref-palette-primary-50);
+    color: white;
 }
 
 /* Footer Styles */
