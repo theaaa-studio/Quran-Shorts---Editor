@@ -5,15 +5,20 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 100vh;
+    height: 100vh;
     margin: 0;
+    overflow: hidden;
 }
 
 .landing-container {
     text-align: center;
     max-width: 1200px;
-    padding: 2rem;
+    padding: 1.5rem;
     width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 }
 
 .landing-header {
@@ -95,12 +100,12 @@ body {
 
 .landing-message {
     color: var(--muted);
-    font-size: 1.2rem;
-    margin: 0 0 1.5rem 0;
+    font-size: 1.1rem;
+    margin: 0 0 1rem 0;
 }
 
 .how-to-use {
-    margin-bottom: 4rem;
+    margin-bottom: 1.5rem;
     display: flex;
     justify-content: center;
 }
@@ -203,13 +208,19 @@ body {
 
 /* Footer Styles */
 .landing-footer {
-    margin-top: 4rem;
-    padding-top: 2rem;
+    margin-top: 1rem;
+    padding-top: 1rem;
     border-top: 1px solid var(--line);
     width: 100%;
     display: flex;
-    justify-content: center;
-    padding-bottom: 2rem;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    padding-bottom: 0.5rem;
+}
+
+.developer-btn {
+    margin-top: 0.5rem;
 }
 
 .developer-link {
@@ -239,25 +250,71 @@ body {
     opacity: 1;
 }
 
+/* Data Sources Section */
+.data-sources {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+}
+
+.data-sources-label {
+    font-size: 0.85rem;
+    color: var(--muted);
+    font-weight: 500;
+}
+
+.data-sources-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.data-source-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.5rem 1rem;
+    font-size: 0.8rem;
+    color: var(--muted);
+    background: transparent;
+    border: 1px solid var(--line);
+    border-radius: 50px;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.data-source-btn:hover {
+    color: var(--md-sys-color-primary);
+    border-color: var(--md-sys-color-primary);
+    background: rgba(0, 97, 53, 0.08);
+    transform: translateY(-2px);
+}
+
+.data-source-btn i {
+    font-size: 0.85rem;
+}
+
 /* Mobile Responsive Styles */
 @media (max-width: 768px) {
     body {
         padding: 0.5rem;
+        height: 100vh;
+        overflow: hidden;
     }
 
     .landing-container {
-        padding: 1rem;
+        padding: 0.75rem;
         display: flex;
         flex-direction: column;
-        /* justify-content: space-between; Removed to allow margins to center content */
-        min-height: calc(100vh - 1rem);
-        /* Account for body padding */
+        justify-content: space-between;
+        height: 100%;
     }
 
     .landing-header {
-        margin-bottom: auto;
-        /* Push down to center middle content */
-        order: 1;
+        margin-bottom: 0.5rem;
     }
 
     .logo {
@@ -265,7 +322,7 @@ body {
         align-items: center;
         justify-content: space-between;
         width: 100%;
-        margin-bottom: 0.5rem;
+        margin-bottom: 0.25rem;
         position: relative;
     }
 
@@ -279,14 +336,14 @@ body {
     }
 
     .logo img {
-        height: 40px;
+        height: 35px;
         flex-shrink: 0;
         position: relative;
         z-index: 1;
     }
 
     .logo h1 {
-        font-size: 1rem;
+        font-size: 0.95rem;
         text-align: center;
     }
 
@@ -297,65 +354,81 @@ body {
 
     .theme-toggle {
         flex-shrink: 0;
-        min-width: 40px;
-        min-height: 40px;
-        font-size: 1.1rem;
+        min-width: 36px;
+        min-height: 36px;
+        font-size: 1rem;
     }
 
     .landing-message {
-        font-size: 0.85rem;
-        margin: 0.5rem 0 1rem;
-        order: 2;
+        font-size: 0.8rem;
+        margin: 0.25rem 0 0.5rem;
     }
 
     .options-grid {
         grid-template-columns: repeat(2, 1fr);
-        gap: 1rem;
-        order: 3;
+        gap: 0.75rem;
     }
 
     .how-to-use {
         margin-bottom: 0;
-        margin-top: 1rem;
-        order: 4;
+        margin-top: 0.5rem;
     }
 
     .option-card {
-        padding: 1.5rem 1rem;
+        padding: 2rem 1.5rem;
+        gap: 1.25rem;
     }
 
     .card-icon {
-        font-size: 2.5rem;
+        font-size: 3.5rem;
+        margin-bottom: 0.75rem;
     }
 
     .option-card h2 {
-        font-size: 1.2rem;
+        font-size: 1.75rem;
     }
 
     .option-card p {
-        font-size: 0.8rem;
+        font-size: 0.85rem;
+        display: block;
     }
 
     .btn {
-        padding: 0.6rem 1rem;
-        font-size: 0.85rem;
+        padding: 0.875rem 1.5rem;
+        font-size: 1.1rem;
+        margin-top: 1rem;
     }
 
     .landing-footer {
-        margin-top: auto;
-        padding-top: 1.5rem;
+        margin-top: 0.5rem;
+        padding-top: 0.75rem;
         display: flex;
+        flex-direction: column;
         justify-content: center;
         align-items: center;
-        order: 5;
+        gap: 0.5rem;
     }
 
     .developer-link {
-        font-size: 0.8rem;
+        font-size: 0.75rem;
         display: flex;
         align-items: center;
         justify-content: center;
         text-align: center;
+    }
+
+    .data-sources {
+        margin-bottom: 0.5rem;
+        gap: 0.5rem;
+    }
+
+    .data-sources-label {
+        font-size: 0.7rem;
+    }
+
+    .data-source-btn {
+        padding: 0.35rem 0.6rem;
+        font-size: 0.65rem;
     }
 }
 
@@ -388,16 +461,16 @@ body {
     }
 
     .option-card {
-        padding: 1rem 0.75rem;
+        padding: 1.5rem 1rem;
     }
 
     .card-icon {
-        font-size: 2rem;
+        font-size: 2.5rem;
         margin-bottom: 0.5rem;
     }
 
     .option-card h2 {
-        font-size: 1rem;
+        font-size: 1.25rem;
     }
 
     .option-card p {
@@ -406,7 +479,7 @@ body {
     }
 
     .btn {
-        padding: 0.5rem 0.75rem;
-        font-size: 0.75rem;
+        padding: 0.625rem 1rem;
+        font-size: 0.875rem;
     }
 }
