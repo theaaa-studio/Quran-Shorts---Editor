@@ -47,22 +47,23 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 0 16px;
+  padding: 12px 20px;
   height: 40px;
   border-radius: var(--md-sys-shape-corner-full);
-  border: 1px solid var(--md-sys-color-outline);
-  background: var(--md-sys-color-surface-container);
-  color: var(--md-sys-color-primary);
+  border: none;
+  background: var(--md-sys-color-secondary-container);
+  color: var(--md-sys-color-on-secondary-container);
   font: var(--md-sys-typescale-label-large);
   user-select: none;
   white-space: nowrap;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.2s cubic-bezier(0.2, 0.0, 0, 1.0);
+  box-shadow: none;
 }
 
 .file-trigger:hover {
-  background: var(--md-sys-color-surface-container-high);
-  border-color: var(--md-sys-color-primary);
+  filter: brightness(0.92);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
 }
 
 .file-trigger svg {
