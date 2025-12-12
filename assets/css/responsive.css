@@ -182,10 +182,16 @@
   }
 
   .nav-btn.active {
-    color: var(--md-sys-color-on-secondary-container);
-    background: var(--md-sys-color-secondary-container);
+    color: var(--md-sys-color-on-surface);
+    background: transparent;
+    border: 1px solid var(--md-sys-color-primary);
     border-radius: 16px;
     /* Pill shape for active indicator */
+  }
+
+  .nav-btn.active:hover {
+    background: var(--md-sys-color-primary);
+    color: var(--md-sys-color-on-primary);
   }
 
   /* Fullscreen Mode Styles */
