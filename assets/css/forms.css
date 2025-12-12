@@ -241,6 +241,14 @@ button:disabled {
   color: rgba(225, 227, 222, 0.38);
 }
 
+/* Disabled - Light Theme */
+[data-theme="light"] .btn:disabled,
+[data-theme="light"] button:disabled {
+  background: rgba(29, 29, 28, 0.12);
+  /* Dark neutral on light surface 12% */
+  color: rgba(29, 29, 28, 0.38);
+}
+
 /* Icon size fix */
 .btn i,
 button i {
