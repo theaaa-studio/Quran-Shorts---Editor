@@ -190,7 +190,6 @@ body {
     justify-content: center;
     gap: 0.5rem;
     margin-top: 1rem;
-    /* Inherits background/color from forms.css */
     width: auto;
     /* landing buttons are inline-flex */
     padding: 0 32px;
@@ -198,12 +197,30 @@ body {
     height: 48px;
     /* Larger target */
     border-radius: var(--md-sys-shape-corner-full);
+    /* Outlined style by default */
+    background: transparent;
+    color: var(--md-sys-color-primary);
+    border: 2px solid var(--md-sys-color-primary);
+    box-shadow: none;
+    transition: all 0.2s cubic-bezier(0.2, 0.0, 0, 1.0);
 }
 
-/* Subtle shift on card hover */
+/* Fill on card hover */
 .option-card:hover .btn {
-    background: var(--md-ref-palette-primary-50);
-    color: white;
+    background: var(--md-sys-color-primary);
+    color: var(--md-sys-color-on-primary);
+    border-color: var(--md-sys-color-primary);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15), 0 1px 8px rgba(0, 0, 0, 0.12);
+}
+
+/* Ensure icon color matches text */
+.option-card .btn i {
+    color: var(--md-sys-color-primary);
+    transition: color 0.2s cubic-bezier(0.2, 0.0, 0, 1.0);
+}
+
+.option-card:hover .btn i {
+    color: var(--md-sys-color-on-primary);
 }
 
 /* Footer Styles */

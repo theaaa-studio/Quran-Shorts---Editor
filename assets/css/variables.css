@@ -67,8 +67,8 @@
   --md-ref-palette-neutral-variant-100: #ffffff;
 
   /* ===================== SYSTEM TOKENS (DARK DEFAULT) ===================== */
-  /* User Override: Use same Green (Primary-40) for Dark Mode as Light Mode */
-  --md-sys-color-primary: var(--md-ref-palette-primary-40);
+  /* User Override: Use lighter Green (Primary-50) for Dark Mode for better visibility */
+  --md-sys-color-primary: var(--md-ref-palette-primary-50);
   --md-sys-color-on-primary: var(--md-ref-palette-primary-100);
   --md-sys-color-primary-container: var(--md-ref-palette-primary-30);
   /* Darker container */
