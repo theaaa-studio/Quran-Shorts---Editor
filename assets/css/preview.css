@@ -104,6 +104,10 @@ html[data-theme="light"] .fullscreen-separator {
   transform: scale(1.05);
 }
 
+.fullscreen-btn:hover i {
+  color: #fff !important;
+}
+
 html[data-theme="light"] .fullscreen-btn {
   background: var(--bg);
   color: var(--text);
@@ -114,6 +118,10 @@ html[data-theme="light"] .fullscreen-btn:hover {
   background: var(--accent-1);
   color: #fff;
   border-color: var(--accent-1) !important;
+}
+
+html[data-theme="light"] .fullscreen-btn:hover i {
+  color: #fff !important;
 }
 
 .ar-btn {
@@ -268,10 +276,15 @@ html[data-theme="light"] .ar-btn.active {
   padding-left: 12px;
 }
 
-/* Make slider smaller and white-ish */
+/* Volume icon - always white */
+.preview-volume i {
+  color: #fff !important;
+}
+
+/* Make slider smaller */
 #volumeSlider {
   width: 80px;
-  accent-color: var(--accent-1);
+  accent-color: #006135;
 }
 
 .preview-volume label,
@@ -281,10 +294,11 @@ html[data-theme="light"] .ar-btn.active {
 }
 
 /* Buttons inside the pill - Icon Style */
+/* Dark theme: white icons, green hover */
 .preview-buttons .btn {
   background: transparent;
   color: #fff;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
   height: 32px;
   width: 32px;
   padding: 0;
@@ -297,9 +311,14 @@ html[data-theme="light"] .ar-btn.active {
 }
 
 .preview-buttons .btn:hover {
-  background: rgba(255, 255, 255, 0.2);
-  border-color: #fff;
+  background: #006135;
+  color: #fff;
+  border-color: #006135;
   transform: scale(1.05);
+}
+
+.preview-buttons .btn:hover i {
+  color: #fff !important;
 }
 
 .audio-error-message {
@@ -343,17 +362,28 @@ html[data-theme="light"] .preview-volume span {
   color: var(--text) !important;
 }
 
+/* Light theme: volume icon black */
+html[data-theme="light"] .preview-volume i {
+  color: #000 !important;
+}
+
 html[data-theme="light"] .preview-volume {
   border-left-color: rgba(0, 0, 0, 0.1);
 }
 
+/* Light theme: black icons, green hover */
 html[data-theme="light"] .preview-buttons .btn {
   background: transparent;
-  color: var(--text);
-  border-color: rgba(0, 0, 0, 0.15);
+  color: #000;
+  border-color: rgba(0, 0, 0, 0.3);
 }
 
 html[data-theme="light"] .preview-buttons .btn:hover {
-  background: rgba(0, 0, 0, 0.05);
-  border-color: var(--text);
+  background: #006135;
+  color: #fff;
+  border-color: #006135;
+}
+
+html[data-theme="light"] .preview-buttons .btn:hover i {
+  color: #fff !important;
 }
